@@ -2,7 +2,7 @@ import { ArrowRightIcon, MagicWandIcon, PlusIcon, TrashIcon } from "@radix-ui/re
 import { Badge, Box, Button, Card, Flex, IconButton, Inset, ScrollArea, Spinner, TextArea, Tooltip } from "@radix-ui/themes"
 import { memo, useEffect, useRef } from "react"
 import { flushSync } from "react-dom"
-import type { Transcriber } from "../whisper/useTranscriber"
+import type { Transcriber } from "./whisper/useTranscriber"
 import { createCue, cueGap, Subtitles, timePrecision, type ICue } from "./Subtitles"
 import { TimeSpanField } from "./TimeSpanField"
 import type { VideoControl } from "./VideoControl"

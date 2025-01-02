@@ -1,7 +1,7 @@
 import { MagicWandIcon } from "@radix-ui/react-icons";
 import { Box, Button, Progress, Spinner, Tooltip } from "@radix-ui/themes";
 import { useEffect } from "react";
-import { type Transcriber, type TranscriberData } from "../whisper/useTranscriber";
+import { type Transcriber, type TranscriberData } from "./whisper/useTranscriber";
 import { cueGap, type ICue, type Subtitles } from "./Subtitles";
 import type { VideoControl } from "./VideoControl";
 

@@ -1,7 +1,7 @@
 import { ClipboardCopyIcon, DownloadIcon, UploadIcon } from "@radix-ui/react-icons"
 import { Button, DropdownMenu, Flex, Tooltip } from "@radix-ui/themes"
 import { useState } from "react"
-import type { Transcriber } from "../whisper/useTranscriber"
+import type { Transcriber } from "./whisper/useTranscriber"
 import { selectFile } from "./DomUtils"
 import { type Subtitles } from "./Subtitles"
 import { TranscribeButton } from "./TranscribeButton"
