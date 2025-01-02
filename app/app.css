@@ -1,0 +1,111 @@
+:root {
+  --timeline-height: 108px;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+.radix-themes {
+  --color-background: var(--accent-2);
+  height: 100%;
+}
+
+.video-dragOverlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-overlay);
+}
+
+video {
+  aspect-ratio: calc(16 / 9);
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: var(--radius-4);
+}
+
+.timeline {
+  height: var(--timeline-height);
+  --card-background-color: var(--accent-3);
+}
+
+.timeline-inner {
+  height: var(--timeline-height);
+}
+
+.timeline-ticks {
+  height: var(--space-5);
+  background:
+      repeat-x bottom left / 100px 100% linear-gradient(to right, var(--gray-10), var(--gray-10) 1px, transparent 1px, transparent),
+      repeat-x bottom left / 10px var(--space-1) linear-gradient(to right, var(--gray-8), var(--gray-8) 1px, transparent 1px, transparent),
+      var(--color-panel-solid);
+  user-select: none;
+}
+
+.timeline-ticks-label {
+  position: absolute;
+  top: 15%;
+  translate: -50%;
+  background-color: var(--color-panel-solid);
+}
+
+.timeline-cue {
+  position: absolute;
+}
+
+.timeline-cue-header {
+  height: var(--space-4);
+  background-color: var(--accent-9);
+  color: var(--accent-contrast);
+  font-weight: bold;
+  cursor: grab;
+  user-select: none;
+}
+
+.is-timeline-cue-moveDragging * {
+  cursor: grabbing !important;
+}
+
+.timeline-cue-edgeHandle {
+  width: var(--space-2);
+  cursor: ew-resize;
+  user-select: none;
+
+  body:not(.is-timeline-cue-moveDragging, .is-timeline-cue-resizeDragging) &:hover,
+  &.is-timeline-cue-edgeHandle-dragging {
+      background-color: var(--accent-4);
+  }
+}
+
+.is-timeline-cue-resizeDragging * {
+  cursor: ew-resize !important;
+}
+
+.timeline-cue-text {
+  height: var(--space-8);
+  flex-grow: 1;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline-playhead {
+  position: absolute;
+  height: calc(var(--timeline-height) - 2px);
+  width: 2px;
+  background-color: var(--accent-9);
+}
+
+.timeline-addButton {
+  visibility: hidden;
+  top: calc(50% + var(--space-5) / 2);
+  left: 0.5px;
+  position: absolute;
+  translate: -50% -50%;
+
+  .is-timeline-freeSpace & {
+      visibility: visible;
+  }
+}
