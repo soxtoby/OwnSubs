@@ -1,7 +1,6 @@
 import type { RefObject } from "react"
-import { readAudioBuffer } from "./whisper/audioBuffer"
 import { fromVTT, type ICue } from "./Subtitles"
-import Constants from "./whisper/Constants.client"
+import { readAudioBuffer } from "./whisper/audioBuffer"
 
 export class VideoControl {
     constructor(
@@ -9,14 +8,14 @@ export class VideoControl {
         private _videoElement: RefObject<HTMLVideoElement | null>
     ) {
         this.src = file ? URL.createObjectURL(file) : null
-        this.audioBuffer = file
+        this.audio = file
             ? readAudioBuffer(file)
-            : Promise.resolve(new AudioBuffer({ length: 1, sampleRate: Constants.SAMPLING_RATE }))
+            : null
     }
 
     readonly src: string | null
 
-    readonly audioBuffer: Promise<AudioBuffer>
+    readonly audio: Promise<AudioBuffer> | null
 
     get isPlaying() { return this.video?.paused === false }
     set isPlaying(value: boolean) {

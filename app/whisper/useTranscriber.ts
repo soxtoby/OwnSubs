@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
-import { useWorker } from "./useWorker";
-import Constants from "./Constants.client";
+import * as Constants from "./constants";
+import Worker from "./worker.js?worker";
 
 interface ProgressItem {
     file: string;
@@ -52,60 +52,15 @@ export function useTranscriber(): Transcriber {
 
     const [progressItems, setProgressItems] = useState<ProgressItem[]>([]);
 
-    const webWorker = useWorker((event) => {
-        const message = event.data;
-        console.log(message)
-        // Update the state with the result
-        switch (message.status) {
-            case "progress":
-                // Model file progress: update one of the progress items.
-                setProgressItems((prev) =>
-                    prev.map((item) => {
-                        if (item.file === message.file) {
-                            return { ...item, progress: message.progress };
-                        }
-                        return item;
-                    }),
-                );
-                break;
-            case "update":
-            case "complete":
-                const busy = message.status === "update";
-                const updateMessage = message as TranscriberUpdateData;
-                setTranscript({
-                    isBusy: busy,
-                    text: updateMessage.data.text,
-                    tps: updateMessage.data.tps,
-                    chunks: updateMessage.data.chunks,
-                });
-                setIsBusy(busy);
-                break;
+    let [webWorker, setWebWorker] = useState<Worker | null>(null);
 
-            case "initiate":
-                // Model file start load: add a new progress item to the list.
-                setIsModelLoading(true);
-                setProgressItems((prev) => [...prev, message]);
-                break;
-            case "ready":
-                setIsModelLoading(false);
-                break;
-            case "error":
-                setIsBusy(false);
-                console.error(`An error occurred: "${message.data.message}". Please file a bug report.`);
-                break;
-            default:
-                // initiate/download/done
-                break;
-        }
-    });
-
-    const [model, setModel] = useState<string>(Constants.DEFAULT_MODEL);
-    const [subtask, setSubtask] = useState<string>(Constants.DEFAULT_SUBTASK);
+    const [model, setModel] = useState<string>(Constants.defaultModel);
+    const [subtask, setSubtask] = useState<string>(Constants.subtask);
     const [multilingual, setMultilingual] = useState<boolean>(
-        Constants.DEFAULT_MULTILINGUAL,
+        Constants.multilingual,
     );
     const [language, setLanguage] = useState<string>(
-        Constants.DEFAULT_LANGUAGE,
+        Constants.language,
     );
 
     const onInputChange = useCallback(() => {
@@ -134,6 +89,8 @@ export function useTranscriber(): Transcriber {
                     audio = audioData.getChannelData(0);
                 }
 
+                setWebWorker(webWorker ??= createWorker());
+
                 webWorker.postMessage({
                     audio,
                     model,
@@ -146,6 +103,57 @@ export function useTranscriber(): Transcriber {
         },
         [webWorker, model, multilingual, subtask, language],
     );
+
+    function createWorker() {
+        let worker = new Worker({ name: "whisper" })
+        worker.onmessage = (event) => {
+            const message = event.data;
+
+            // Update the state with the result
+            switch (message.status) {
+                case "progress":
+                    // Model file progress: update one of the progress items.
+                    setProgressItems((prev) =>
+                        prev.map((item) => {
+                            if (item.file === message.file) {
+                                return { ...item, progress: message.progress };
+                            }
+                            return item;
+                        }),
+                    );
+                    break;
+                case "update":
+                case "complete":
+                    const busy = message.status === "update";
+                    const updateMessage = message as TranscriberUpdateData;
+                    setTranscript({
+                        isBusy: busy,
+                        text: updateMessage.data.text,
+                        tps: updateMessage.data.tps,
+                        chunks: updateMessage.data.chunks,
+                    });
+                    setIsBusy(busy);
+                    break;
+
+                case "initiate":
+                    // Model file start load: add a new progress item to the list.
+                    setIsModelLoading(true);
+                    setProgressItems((prev) => [...prev, message]);
+                    break;
+                case "ready":
+                    setIsModelLoading(false);
+                    break;
+                case "error":
+                    setIsBusy(false);
+                    console.error(`An error occurred: "${message.data.message}". Please file a bug report.`);
+                    break;
+                default:
+                    // initiate/download/done
+                    break;
+            }
+        }
+        return worker
+    }
 
     const transcriber = useMemo(() => {
         return {

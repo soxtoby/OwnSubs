@@ -1,9 +1,9 @@
 import { MagicWandIcon } from "@radix-ui/react-icons";
 import { Box, Button, Progress, Spinner, Tooltip } from "@radix-ui/themes";
 import { useEffect } from "react";
-import { type Transcriber, type TranscriberData } from "./whisper/useTranscriber";
 import { cueGap, type ICue, type Subtitles } from "./Subtitles";
 import type { VideoControl } from "./VideoControl";
+import { type Transcriber, type TranscriberData } from "./whisper/useTranscriber";
 
 interface ITranscribeButtonProps {
     video: VideoControl
@@ -34,14 +34,12 @@ export function TranscribeButton({ video, subtitles, transcriber }: ITranscribeB
             : "Transcribe video"
 
     return <Tooltip open={transcriber.isModelLoading} content={<Box p="2" width="200px"><Progress value={progress || null} /></Box>}>
-        <Button onClick={transcribe} disabled={!video.file}>{buttonIcon} {buttonText}</Button>
+        <Button onClick={transcribe} disabled={!video.file || transcriber.isBusy}>{buttonIcon} {buttonText}</Button>
     </Tooltip>
 
     async function transcribe() {
-        if (transcriber.isBusy)
-            transcriber.onInputChange() // Cancel
-        else
-            transcriber.start(await video.audioBuffer)
+        if (!transcriber.isBusy && video.audio)
+            transcriber.start(await video.audio)
     }
 }
 

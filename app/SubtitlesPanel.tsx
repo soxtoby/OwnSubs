@@ -36,8 +36,11 @@ export function SubtitlesPanel({ video, subtitles, transcriber, subsLoading }: I
                     ? <Flex align="center" justify="center" height="100%">
                         <Flex align="center" gap="2">
                             No subtitles yet. You can
-                            <Button onClick={async () => transcriber.start(await video.audioBuffer)}><MagicWandIcon /> Transcribe</Button>
-                            the video automatically, or
+                            {video.audio &&
+                                <>
+                                    <Button onClick={async () => transcriber.start(await video.audio!)}><MagicWandIcon /> Transcribe</Button>
+                                    the video automatically, or
+                                </>}
                             <Button onClick={() => subtitles.insert(createCue(0, 1, 'Your text here'))}><PlusIcon /> Add a cue</Button>
                             to get started.
                         </Flex>
