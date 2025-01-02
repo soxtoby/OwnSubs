@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState } from "react"
+import Worker from "./worker.js?worker"
 
 export interface MessageEventHandler {
     (event: MessageEvent): void;
@@ -11,9 +12,7 @@ export function useWorker(messageEventHandler: MessageEventHandler): Worker {
 }
 
 function createWorker(messageEventHandler: MessageEventHandler): Worker {
-    const worker = new Worker(new URL("./worker.js", import.meta.url), {
-        type: "module",
-    });
+    const worker = new Worker({ name: "whisper" });
     // Listen for messages from the Web Worker
     worker.addEventListener("message", messageEventHandler);
     return worker;
