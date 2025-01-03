@@ -2,11 +2,11 @@ import { ArrowRightIcon, MagicWandIcon, PlusIcon, TrashIcon, UploadIcon } from "
 import { Badge, Box, Button, Card, Flex, IconButton, ScrollArea, Skeleton, TextArea, Tooltip } from "@radix-ui/themes"
 import { memo, useEffect, useRef } from "react"
 import { flushSync } from "react-dom"
+import { useVideoFetcher } from "../video/VideoFetcher"
+import { useTranscriber } from "../whisper/Transcriber"
 import { createCue, cueGap, Subtitles, timePrecision, type ICue } from "./Subtitles"
 import { TimeSpanField } from "./TimeSpanField"
 import type { VideoControl } from "./VideoControl"
-import { useVideoFetcher } from "./VideoFetcher"
-import { useTranscriber } from "./whisper/Transcriber"
 
 export interface ISubtitlesPanelProps {
     video?: VideoControl

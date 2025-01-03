@@ -1,6 +1,6 @@
 import type { RefObject } from "react"
+import { readAudioBuffer } from "../whisper/audioBuffer"
 import { fromVTT, type ICue } from "./Subtitles"
-import { readAudioBuffer } from "./whisper/audioBuffer"
 
 export class VideoControl {
     constructor(

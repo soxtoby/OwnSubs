@@ -1,11 +1,11 @@
 import { useMemo, useReducer, useRef } from "react";
-import type { Route } from "./+types/edit";
-import { useGlobalEventListener } from "./DomUtils";
+import { useGlobalEventListener } from "../DomUtils";
 import { MainUI } from "./MainUI";
-import { Subtitles, readSubsFile } from "./Subtitles";
+import { fileNameWithoutExtension, getSubs, getVideo, setSubs } from "../storage";
+import { TranscriberProvider } from "../whisper/Transcriber";
+import type { Route } from "./+types/EditRoute";
+import { readSubsFile, Subtitles } from "./Subtitles";
 import { VideoControl } from "./VideoControl";
-import { fileNameWithoutExtension, getSubs, getVideo, setSubs } from "./storage";
-import { TranscriberProvider } from "./whisper/Transcriber";
 
 export async function clientLoader(args: Route.ClientLoaderArgs) {
     let videoFile = await getVideo(file => fileNameWithoutExtension(file.name) == args.params.fileName)

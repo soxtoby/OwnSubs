@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { useFetcher } from "react-router"
 import { $path } from "safe-routes"
-import { selectFile } from "./DomUtils"
+import { selectFile } from "../DomUtils"
 
 export function useVideoFetcher() {
     let fetcher = useFetcher({ key: 'videoFile' })
@@ -21,4 +21,4 @@ export function useVideoFetcher() {
     }), [fetcher])
 }
 
-const fileKey = 'file'
+export const fileKey = 'file'

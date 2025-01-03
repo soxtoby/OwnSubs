@@ -1,9 +1,9 @@
 import { MagicWandIcon } from "@radix-ui/react-icons";
 import { Box, Button, Progress, Spinner, Tooltip } from "@radix-ui/themes";
 import { useEffect } from "react";
+import { useTranscriber, type ITranscriber, type TranscriberData } from "../whisper/Transcriber";
 import { cueGap, type ICue, type Subtitles } from "./Subtitles";
 import type { VideoControl } from "./VideoControl";
-import { useTranscriber, type ITranscriber, type TranscriberData } from "./whisper/Transcriber";
 
 interface ITranscribeButtonProps {
     video: VideoControl

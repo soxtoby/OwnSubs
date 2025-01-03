@@ -1,4 +1,4 @@
-const directoryName = 'titleist'
+const directoryName = 'subs'
 
 export async function getVideo(predicate: (file: File) => boolean) {
     try {

@@ -1,13 +1,13 @@
 import { ClipboardCopyIcon, DownloadIcon, UploadIcon } from "@radix-ui/react-icons"
 import { Button, DropdownMenu, Flex, Tooltip } from "@radix-ui/themes"
 import { useState } from "react"
-import { selectFile } from "./DomUtils"
-import { subtitlesFileName } from "./storage"
-import { useSubsFetcher } from "./SubsFetcher"
+import { selectFile } from "../DomUtils"
+import { subtitlesFileName } from "../storage"
+import { useSubsFetcher } from "../subs/SubsFetcher"
+import { useVideoFetcher } from "../video/VideoFetcher"
 import { type Subtitles } from "./Subtitles"
 import { TranscribeButton } from "./TranscribeButton"
 import type { VideoControl } from "./VideoControl"
-import { useVideoFetcher } from "./VideoFetcher"
 
 interface IToolbarProps {
     fileName?: string

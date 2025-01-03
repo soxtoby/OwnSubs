@@ -1,14 +1,14 @@
 import { Card, Flex, Text } from "@radix-ui/themes";
 import { useState, type Ref } from "react";
-import { useMessageBox } from "./MessageBox";
-import { useSubsFetcher } from "./SubsFetcher";
 import type { Subtitles } from "./Subtitles";
 import { SubtitlesPanel } from "./SubtitlesPanel";
 import { TimelinePanel } from "./TimelinePanel";
 import { Toolbar } from "./Toolbar";
 import type { VideoControl } from "./VideoControl";
-import { useVideoFetcher } from "./VideoFetcher";
 import { VideoPanel } from "./VideoPanel";
+import { useMessageBox } from "../MessageBox";
+import { useSubsFetcher } from "../subs/SubsFetcher";
+import { useVideoFetcher } from "../video/VideoFetcher";
 
 export interface IMainUIProps {
     fileName: string

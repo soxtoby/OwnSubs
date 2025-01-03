@@ -1,5 +1,5 @@
-import type { Route } from "./+types/subs";
-import { setSubs } from "./storage";
+import { setSubs } from "../storage";
+import type { Route } from "./+types/SubsRoute";
 import { fileKey } from "./SubsFetcher";
 
 export async function clientAction({ request, params: { videoFileName } }: Route.ClientActionArgs) {

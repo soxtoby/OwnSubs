@@ -1,8 +1,8 @@
 import { redirect } from "react-router";
 import { $path } from "safe-routes";
-import type { Route } from "./+types/video";
-import { fileNameWithoutExtension, setVideo } from "./storage";
-import { fileKey } from "./SubsFetcher";
+import { fileNameWithoutExtension, setVideo } from "../storage";
+import type { Route } from "./+types/VideoRoute";
+import { fileKey } from "./VideoFetcher";
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
     let formData = await request.formData()

@@ -1,11 +1,11 @@
 import { PlusIcon } from "@radix-ui/react-icons"
 import { Box, Card, Flex, IconButton, Inset, ScrollArea, Text, Tooltip } from "@radix-ui/themes"
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
-import { addClass } from "./DomUtils"
+import { addClass } from "../DomUtils"
+import { binarySearch } from "../utils"
 import { createCue, cueGap, minDuration, timePrecision, type ICue, type Subtitles } from "./Subtitles"
 import { timeSpan } from "./TimeSpanField"
 import type { VideoControl } from "./VideoControl"
-import { binarySearch } from "./utils"
 
 export interface ITimelinePanelProps {
     video?: VideoControl
