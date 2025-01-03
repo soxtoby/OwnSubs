@@ -1,6 +1,6 @@
 import { PlusIcon } from "@radix-ui/react-icons"
 import { Box, Card, Flex, IconButton, Inset, ScrollArea, Text, Tooltip } from "@radix-ui/themes"
-import { memo, useCallback, useEffect, useRef, useState } from "react"
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { addClass } from "./DomUtils"
 import { createCue, cueGap, minDuration, timePrecision, type ICue, type Subtitles } from "./Subtitles"
 import { timeSpan } from "./TimeSpanField"
@@ -30,10 +30,12 @@ export function TimelinePanel({ subtitles, video }: ITimelinePanelProps) {
         }
     })
 
-    let playheadRef = useRef<HTMLDivElement>(null!)
+    let playheadRef = useRef<HTMLDivElement>(null)
     let updatePlayheadPosition = useCallback(() => {
-        playheadRef.current.style.transform = `translate3d(${video.currentTime * widthPerSecond}px, 0, 0)`
-        playheadRef.current.classList.toggle('is-timeline-freeSpace', noCuesAtCurrentTime())
+        if (playheadRef.current) {
+            playheadRef.current.style.transform = `translate3d(${video.currentTime * widthPerSecond}px, 0, 0)`
+            playheadRef.current.classList.toggle('is-timeline-freeSpace', noCuesAtCurrentTime())
+        }
     }, [video, subtitles])
 
     let seek = useCallback((seconds: number) => {
@@ -52,11 +54,13 @@ export function TimelinePanel({ subtitles, video }: ITimelinePanelProps) {
                                 <TimelineCue key={cue.id} cue={cue} index={index} subtitles={subtitles} video={video} />
                             )}
                         </Box>
-                        <div ref={playheadRef} className={'timeline-playhead' + (noCuesAtCurrentTime() ? ' is-timeline-freeSpace' : '')}>
-                            <Tooltip content="Add cue">
-                                <IconButton radius="full" size="1" className="timeline-addButton" onClick={insertCue}><PlusIcon /></IconButton>
-                            </Tooltip>
-                        </div>
+                        {video.file &&
+                            <div ref={playheadRef} className={'timeline-playhead' + (noCuesAtCurrentTime() ? ' is-timeline-freeSpace' : '')}>
+                                <Tooltip content="Add cue">
+                                    <IconButton radius="full" size="1" className="timeline-addButton" onClick={insertCue}><PlusIcon /></IconButton>
+                                </Tooltip>
+                            </div>
+                        }
                     </Flex>
                 </ScrollArea>
             </Inset>
@@ -80,12 +84,12 @@ export function TimelinePanel({ subtitles, video }: ITimelinePanelProps) {
 
     function onSeeked() {
         updatePlayheadPosition()
-        playheadRef.current.scrollIntoView({ behavior: 'smooth' })
+        playheadRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
     function onPlaying() {
         updatePlayheadPosition()
-        playheadRef.current.scrollIntoView({ behavior: 'instant', inline: 'center' })
+        playheadRef.current?.scrollIntoView({ behavior: 'instant', inline: 'center' })
         raf.current = requestAnimationFrame(onPlaying)
     }
 
@@ -101,9 +105,14 @@ interface ITimelineTicksProps {
 
 const TimelineTicks = memo(function TimelineTicks({ maxTime, setTime }: ITimelineTicksProps) {
     let ref = useRef<HTMLDivElement>(null!)
-    let clientRect = useRef<DOMRect>(new DOMRect())
-    let maxSeconds = Math.ceil(Math.max(maxTime, window.innerWidth / widthPerSecond))
+    let clientRect = useRef<DOMRect | null>(null)
+    let [maxSeconds, setMaxSeconds] = useState(Math.ceil(maxTime))
     let seconds = Array.from({ length: maxSeconds - 1 }).map((_, i) => i + 1)
+
+    useLayoutEffect(() => {
+        setMaxSeconds(Math.ceil(Math.max(maxTime, window.innerWidth / widthPerSecond)))
+    })
+
     return <Box ref={ref} className="timeline-ticks" position="relative" onMouseDown={onMouseDown} onMouseMove={onMouseMove}>
         {seconds.map(s =>
             <Text key={s} size="1" as="div" className="timeline-ticks-label" style={{ left: `${s * widthPerSecond}px` }}>{timeSpan(s, false)}</Text>
@@ -123,7 +132,8 @@ const TimelineTicks = memo(function TimelineTicks({ maxTime, setTime }: ITimelin
     }
 
     function setTimeFromPosition(clientX: number) {
-        setTime(+((clientX - clientRect.current.left + ref.current.scrollLeft) / widthPerSecond).toFixed(timePrecision))
+        if (clientRect.current)
+            setTime(+((clientX - clientRect.current.left + ref.current.scrollLeft) / widthPerSecond).toFixed(timePrecision))
     }
 })
 

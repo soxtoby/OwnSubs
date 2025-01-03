@@ -1,18 +1,18 @@
-import { UploadIcon } from "@radix-ui/react-icons"
-import { Button, Card, Flex, Spinner, Text } from "@radix-ui/themes"
-import { useQuery } from "@tanstack/react-query"
-import { useMemo, useReducer, useRef, useState } from "react"
-import { selectFile, useGlobalEventListener } from "./DomUtils"
-import { Subtitles, readSubsFile } from "./Subtitles"
-import { SubtitlesPanel } from "./SubtitlesPanel"
-import { TimelinePanel } from "./TimelinePanel"
-import { Toolbar } from "./Toolbar"
-import { VideoControl } from "./VideoControl"
-import { VideoPanel } from "./VideoPanel"
-import { useFileStorage } from "./storage"
-import { useTranscriber } from "./whisper/useTranscriber"
+import { Card, Flex, Text } from "@radix-ui/themes";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo, useReducer, useRef, useState } from "react";
+import type { Route } from "./+types/home";
+import { selectFile, useGlobalEventListener } from "./DomUtils";
+import { Subtitles, readSubsFile } from "./Subtitles";
+import { SubtitlesPanel } from "./SubtitlesPanel";
+import { TimelinePanel } from "./TimelinePanel";
+import { Toolbar } from "./Toolbar";
+import { VideoControl } from "./VideoControl";
+import { VideoPanel } from "./VideoPanel";
+import { useFileStorage } from "./storage";
+import { useTranscriber } from "./whisper/useTranscriber";
 
-export function Home() {
+export default function Home(params: Route.ComponentProps) {
     let videoRef = useRef<HTMLVideoElement>(null)
     let { videoFile, setVideoFile, subsFile, setSubsFile, videoLoading, subsLoading } = useFileStorage()
     let video = useMemo(
@@ -39,20 +39,11 @@ export function Home() {
     return <Flex direction="column" height="100%">
         <Toolbar video={video} subtitles={subtitles} selectVideo={selectVideo} setSubsFile={setSubsFile} transcriber={transcriber} />
         <Flex flexGrow="1" direction="column" overflow="hidden" onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-            {videoLoading && <Flex align="center" justify="center" flexGrow="1">
-                <Spinner loading size="3" />
-            </Flex>}
-            {video.file
-                ? <>
-                    <Flex flexGrow="1" align="stretch" overflow="hidden">
-                        <SubtitlesPanel video={video} subtitles={subtitles} transcriber={transcriber} subsLoading={subsLoading || cuesLoading} />
-                        <VideoPanel videoRef={videoRef} video={video} subtitles={subtitles} />
-                    </Flex>
-                    <TimelinePanel subtitles={subtitles} video={video} />
-                </>
-                : <Flex align="center" justify="center" flexGrow="1">
-                    <Flex gap="2" align="center"><Button onClick={selectVideo}><UploadIcon /> Load a video</Button> to get started</Flex>
-                </Flex>}
+            <Flex flexGrow="1" align="stretch" overflow="hidden">
+                <SubtitlesPanel video={video} subtitles={subtitles} transcriber={transcriber} selectVideo={selectVideo} subsLoading={subsLoading || cuesLoading} />
+                <VideoPanel videoRef={videoRef} video={video} subtitles={subtitles} videoLoading={videoLoading} />
+            </Flex>
+            <TimelinePanel subtitles={subtitles} video={video} />
             {isDraggingOver &&
                 <Flex align="center" justify="center" className="video-dragOverlay">
                     <Card>

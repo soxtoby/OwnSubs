@@ -1,20 +1,21 @@
-import { ArrowRightIcon, MagicWandIcon, PlusIcon, TrashIcon } from "@radix-ui/react-icons"
-import { Badge, Box, Button, Card, Flex, IconButton, Inset, ScrollArea, Spinner, TextArea, Tooltip } from "@radix-ui/themes"
+import { ArrowRightIcon, MagicWandIcon, PlusIcon, TrashIcon, UploadIcon } from "@radix-ui/react-icons"
+import { Badge, Box, Button, Card, Flex, IconButton, ScrollArea, Skeleton, TextArea, Tooltip } from "@radix-ui/themes"
 import { memo, useEffect, useRef } from "react"
 import { flushSync } from "react-dom"
-import type { Transcriber } from "./whisper/useTranscriber"
 import { createCue, cueGap, Subtitles, timePrecision, type ICue } from "./Subtitles"
 import { TimeSpanField } from "./TimeSpanField"
 import type { VideoControl } from "./VideoControl"
+import type { Transcriber } from "./whisper/useTranscriber"
 
 export interface ISubtitlesPanelProps {
     video: VideoControl
     subtitles: Subtitles
     transcriber: Transcriber
+    selectVideo: () => void
     subsLoading: boolean
 }
 
-export function SubtitlesPanel({ video, subtitles, transcriber, subsLoading }: ISubtitlesPanelProps) {
+export function SubtitlesPanel({ video, subtitles, transcriber, selectVideo, subsLoading }: ISubtitlesPanelProps) {
     let lastActiveCueId = useRef(video.activeCue?.id)
 
     useEffect(() => {
@@ -28,11 +29,11 @@ export function SubtitlesPanel({ video, subtitles, transcriber, subsLoading }: I
 
     return <Box p="2" flexGrow="2">
         <Card variant="classic" style={{ height: '100%', '--card-padding': '0px' }}>
-            {subsLoading
+            {!video.file
                 ? <Flex align="center" justify="center" height="100%">
-                    <Spinner loading size="3" />
+                    <Flex gap="2" align="center"><Button onClick={selectVideo}><UploadIcon /> Load a video</Button> to get started</Flex>
                 </Flex>
-                : subtitles.cues.length == 0
+                : !subsLoading && subtitles.cues.length == 0
                     ? <Flex align="center" justify="center" height="100%">
                         <Flex align="center" gap="2">
                             No subtitles yet. You can
@@ -45,17 +46,15 @@ export function SubtitlesPanel({ video, subtitles, transcriber, subsLoading }: I
                             to get started.
                         </Flex>
                     </Flex>
-                    : <Inset style={{ height: '100%' }}>
-                        <ScrollArea scrollbars="vertical" size="3">
-                            <Box p="2">
-                                <Flex direction="column">
-                                    {subtitles.cues.map((cue, i) =>
-                                        <Cue key={cue.id} cue={cue} index={i} subtitles={subtitles} videoControl={video} />
-                                    )}
-                                </Flex>
-                            </Box>
-                        </ScrollArea>
-                    </Inset>}
+                    : <ScrollArea scrollbars="vertical" size="3">
+                        <Box p="2">
+                            <Flex direction="column">
+                                {(subsLoading ? skeletonCues : subtitles.cues).map((cue, i) =>
+                                    <Cue key={cue.id} cue={cue} index={i} subtitles={subtitles} videoControl={video} loading={subsLoading} />
+                                )}
+                            </Flex>
+                        </Box>
+                    </ScrollArea>}
         </Card>
     </Box>
 
@@ -80,40 +79,53 @@ interface ICueProps {
     index: number
     subtitles: Subtitles
     videoControl: VideoControl
+    loading: boolean
 }
 
-const Cue = memo(function Cue({ cue, index, subtitles, videoControl }: ICueProps) {
+const Cue = memo(function Cue({ cue, index, subtitles, videoControl, loading }: ICueProps) {
     return <Flex id={cueElementId(cue)} gap="2" p="2" align="stretch" className="cue">
         <Flex direction="column" justify="between">
             <Flex justify="between" align="center">
-                <Badge variant="solid">{index + 1}</Badge>
+                <Skeleton loading={loading}>
+                    <Badge variant="solid">{index + 1}</Badge>
+                </Skeleton>
                 <Flex gap="2" className="cue-actions">
                     <Tooltip content="Remove">
-                        <IconButton size="1" color="gray" variant="soft" onClick={() => subtitles.remove(cue.id)} >
-                            <TrashIcon />
-                        </IconButton>
+                        <Skeleton loading={loading}>
+                            <IconButton size="1" color="gray" variant="soft" onClick={() => subtitles.remove(cue.id)} >
+                                <TrashIcon />
+                            </IconButton>
+                        </Skeleton>
                     </Tooltip>
                 </Flex>
             </Flex>
             <Flex gap="2" align="center">
                 <Box width="70px">
-                    <TimeSpanField size="1" variant="soft" seconds={cue.start} onChange={onStartTimeChange} />
+                    <Skeleton loading={loading}>
+                        <TimeSpanField size="1" variant="soft" seconds={cue.start} onChange={onStartTimeChange} />
+                    </Skeleton>
                 </Box>
-                <ArrowRightIcon />
+                <Skeleton loading={loading}>
+                    <ArrowRightIcon />
+                </Skeleton>
                 <Box width="70px">
-                    <TimeSpanField size="1" variant="soft" seconds={cue.end} onChange={onEndTimeChange} />
+                    <Skeleton loading={loading}>
+                        <TimeSpanField size="1" variant="soft" seconds={cue.end} onChange={onEndTimeChange} />
+                    </Skeleton>
                 </Box>
             </Flex>
         </Flex>
-        <Box asChild flexGrow="1">
-            <TextArea
-                className={cueTextClass}
-                value={cue.text}
-                onKeyDown={onTextKeyDown}
-                onChange={onTextChange}
-                onFocus={() => videoControl.activeCue = cue}
-            />
-        </Box>
+        <Skeleton loading={loading}>
+            <Box asChild flexGrow="1">
+                <TextArea
+                    className={cueTextClass}
+                    value={cue.text}
+                    onKeyDown={onTextKeyDown}
+                    onChange={onTextChange}
+                    onFocus={() => videoControl.activeCue = cue}
+                />
+            </Box>
+        </Skeleton>
     </Flex>
 
     function onTextKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -211,3 +223,5 @@ const cueTextClass = 'cue-text'
 export function cueElementId(cue: ICue) {
     return `cue-${cue.id}`
 }
+
+const skeletonCues: ICue[] = Array.from({ length: 10 }, (_, i) => ({ id: `skele-${i}`, start: i, end: i + 0.9, text: '' }))
