@@ -6,7 +6,7 @@ import { setSubs } from "./storage";
 
 export async function clientAction({ request, params: { videoFileName } }: Route.ClientActionArgs) {
     let formData = await request.formData()
-    let file = formData.get('file')
+    let file = formData.get(fileKey)
     if (file instanceof File)
         await setSubs(file, videoFileName)
     else
@@ -19,9 +19,11 @@ export function useSubsFetcher() {
     return useMemo(() => ({
         setSubs(file: File, videoFileName: string) {
             let form = new FormData()
-            form.set('file', file)
-            fetcher.submit(form, { method: 'POST', action: $path('/subs/:videoFileName', { videoFileName }) })
+            form.set(fileKey, file)
+            fetcher.submit(form, { method: 'POST', action: $path('/subs/:videoFileName', { videoFileName }), encType: 'multipart/form-data' })
         },
         state: fetcher.state
     }), [fetcher])
 }
+
+const fileKey = 'file'

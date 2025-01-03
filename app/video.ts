@@ -3,14 +3,14 @@ import { redirect, useFetcher } from "react-router";
 import { $path } from "safe-routes";
 import type { Route } from "./+types/video";
 import { selectFile } from "./DomUtils";
-import { setVideo } from "./storage";
+import { fileNameWithoutExtension, setVideo } from "./storage";
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
     let formData = await request.formData()
-    let file = formData.get('file')
+    let file = formData.get(fileKey)
     if (file instanceof File) {
         await setVideo(file)
-        return redirect($path('/edit/:fileName', { fileName: file.name }))
+        return redirect($path('/edit/:fileName', { fileName: fileNameWithoutExtension(file.name) }))
     } else {
         throw new Error('No file uploaded')
     }
@@ -27,9 +27,11 @@ export function useVideoFetcher() {
         },
         setVideo(file: File) {
             let form = new FormData()
-            form.set('file', file)
-            fetcher.submit(form, { method: 'POST', action: $path('/video') })
+            form.set(fileKey, file)
+            fetcher.submit(form, { method: 'POST', action: $path('/video'), encType: 'multipart/form-data' })
         },
         state: fetcher.state
     }), [fetcher])
 }
+
+const fileKey = 'file'

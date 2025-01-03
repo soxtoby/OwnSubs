@@ -32,7 +32,7 @@ export default function Edit({ loaderData: { videoFile, subsFile, cues }, params
     useGlobalEventListener('keydown', onKeyDown)
 
     return <TranscriberProvider>
-        <MainUI fileName={fileName} video={video ?? undefined} subtitles={subtitles} />
+        <MainUI fileName={fileName} videoRef={videoRef} video={video ?? undefined} subtitles={subtitles} />
     </TranscriberProvider>
 
     function onCuesUpdated(subtitles: Subtitles, committed: boolean) {
