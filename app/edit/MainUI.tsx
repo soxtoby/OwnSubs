@@ -1,5 +1,5 @@
 import { Card, Flex, Text } from "@radix-ui/themes";
-import { useState, type Ref } from "react";
+import { useState, type PropsWithChildren, type Ref } from "react";
 import type { Subtitles } from "./Subtitles";
 import { SubtitlesPanel } from "./SubtitlesPanel";
 import { TimelinePanel } from "./TimelinePanel";
@@ -11,14 +11,14 @@ import { useSubsFetcher } from "../subs/SubsFetcher";
 import { useVideoFetcher } from "../video/VideoFetcher";
 
 export interface IMainUIProps {
-    fileName: string
+    fileName?: string
     videoRef?: Ref<HTMLVideoElement>
     video?: VideoControl
     subtitles?: Subtitles
     loading?: boolean
 }
 
-export function MainUI({ fileName, videoRef, video, subtitles, loading }: IMainUIProps) {
+export function MainUI({ fileName, videoRef, video, subtitles, loading, children }: PropsWithChildren<IMainUIProps>) {
     let [isDraggingOver, setIsDraggingOver] = useState(false)
 
     let videoFetcher = useVideoFetcher()
@@ -29,7 +29,7 @@ export function MainUI({ fileName, videoRef, video, subtitles, loading }: IMainU
         <Toolbar fileName={fileName} video={video} subtitles={subtitles} />
         <Flex flexGrow="1" direction="column" overflow="hidden" onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
             <Flex flexGrow="1" align="stretch" overflow="hidden">
-                <SubtitlesPanel video={video} subtitles={subtitles} />
+                <SubtitlesPanel video={video} subtitles={subtitles}>{children}</SubtitlesPanel>
                 <VideoPanel videoRef={videoRef} video={video} subtitles={subtitles} loading={loading || videoFetcher.state == 'submitting'} />
             </Flex>
             <TimelinePanel video={video} subtitles={subtitles} />

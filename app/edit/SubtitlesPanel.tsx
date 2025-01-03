@@ -1,6 +1,6 @@
 import { ArrowRightIcon, MagicWandIcon, PlusIcon, TrashIcon, UploadIcon } from "@radix-ui/react-icons"
 import { Badge, Box, Button, Card, Flex, IconButton, ScrollArea, Skeleton, TextArea, Tooltip } from "@radix-ui/themes"
-import { memo, useEffect, useRef } from "react"
+import { memo, useEffect, useRef, type PropsWithChildren } from "react"
 import { flushSync } from "react-dom"
 import { useVideoFetcher } from "../video/VideoFetcher"
 import { useTranscriber } from "../whisper/Transcriber"
@@ -13,7 +13,7 @@ export interface ISubtitlesPanelProps {
     subtitles?: Subtitles
 }
 
-export function SubtitlesPanel({ video, subtitles }: ISubtitlesPanelProps) {
+export function SubtitlesPanel({ video, subtitles, children }: PropsWithChildren<ISubtitlesPanelProps>) {
     let lastActiveCueId = useRef(video?.activeCue?.id)
 
     useEffect(() => {
@@ -29,10 +29,11 @@ export function SubtitlesPanel({ video, subtitles }: ISubtitlesPanelProps) {
 
     return <Box p="2" flexGrow="2">
         <Card variant="classic" style={{ height: '100%', '--card-padding': '0px' }}>
-            {!subtitles ? <Cues />
-                : !video ? <UploadVideoMessage />
-                    : subtitles.cues.length == 0 ? <NoSubsMessage video={video} subtitles={subtitles} />
-                        : <Cues video={video} subtitles={subtitles} />
+            {children ? children
+                : !subtitles ? <Cues />
+                    : !video ? <UploadVideoMessage />
+                        : subtitles.cues.length == 0 ? <NoSubsMessage video={video} subtitles={subtitles} />
+                            : <Cues video={video} subtitles={subtitles} />
             }
         </Card>
     </Box>
@@ -53,11 +54,19 @@ export function SubtitlesPanel({ video, subtitles }: ISubtitlesPanelProps) {
     }
 }
 
+export function MissingVideoMessage({ fileName }: { fileName: string }) {
+    let videoFetcher = useVideoFetcher()
+
+    return <Flex align="center" justify="center" height="100%">
+        <Flex gap="2" align="center">No video found with name "{fileName}". <Button onClick={() => videoFetcher.selectVideo()}><UploadIcon /> Load a new video</Button> to get started.</Flex>
+    </Flex>
+}
+
 function UploadVideoMessage() {
     let videoFetcher = useVideoFetcher()
 
     return <Flex align="center" justify="center" height="100%">
-        <Flex gap="2" align="center"><Button onClick={() => videoFetcher.selectVideo()}><UploadIcon /> Load a video</Button> to get started</Flex>
+        <Flex gap="2" align="center"><Button onClick={() => videoFetcher.selectVideo()}><UploadIcon /> Load a video</Button> to get started.</Flex>
     </Flex>
 }
 

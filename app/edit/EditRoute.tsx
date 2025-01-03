@@ -1,14 +1,18 @@
 import { useMemo, useReducer, useRef } from "react";
+import { data, isRouteErrorResponse } from "react-router";
 import { useGlobalEventListener } from "../DomUtils";
-import { MainUI } from "./MainUI";
 import { fileNameWithoutExtension, getSubs, getVideo, setSubs } from "../storage";
 import { TranscriberProvider } from "../whisper/Transcriber";
 import type { Route } from "./+types/EditRoute";
+import { MainUI } from "./MainUI";
 import { readSubsFile, Subtitles } from "./Subtitles";
+import { MissingVideoMessage } from "./SubtitlesPanel";
 import { VideoControl } from "./VideoControl";
 
 export async function clientLoader(args: Route.ClientLoaderArgs) {
     let videoFile = await getVideo(file => fileNameWithoutExtension(file.name) == args.params.fileName)
+    if (!videoFile)
+        throw data("Video not found", { status: 404 })
     let subsFile = videoFile && await getSubs(videoFile.name)
     let cues = subsFile ? await readSubsFile(subsFile) : []
     return { videoFile, subsFile, cues } as const
@@ -16,6 +20,13 @@ export async function clientLoader(args: Route.ClientLoaderArgs) {
 
 export function HydrateFallback({ params: { fileName } }: Route.HydrateFallbackProps) {
     return <MainUI fileName={fileName} loading />
+}
+
+export function ErrorBoundary({ error, params: { fileName } }: Route.ErrorBoundaryProps) {
+    if (isRouteErrorResponse(error) && error.status == 404)
+        return <MainUI><MissingVideoMessage fileName={fileName} /></MainUI>
+    else
+        throw error
 }
 
 export default function Edit({ loaderData: { videoFile, subsFile, cues }, params: { fileName } }: Route.ComponentProps) {
