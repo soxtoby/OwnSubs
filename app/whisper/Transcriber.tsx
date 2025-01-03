@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { createContext, use, useCallback, useMemo, useState, type PropsWithChildren } from "react";
 import * as Constants from "./constants";
 import Worker from "./worker.js?worker";
 
@@ -26,13 +26,18 @@ export interface TranscriberData {
     chunks: { text: string; timestamp: [number, number | null] }[];
 }
 
-export interface Transcriber {
+/** Just the bits I need */
+export interface ITranscriber {
+    readonly isBusy: boolean;
+    readonly isModelLoading: boolean;
+    readonly progressItems: ProgressItem[];
+    start(audioData: AudioBuffer | undefined): void;
+    readonly output?: TranscriberData;
+}
+
+/** Everything provided */
+export interface Transcriber extends ITranscriber {
     onInputChange: () => void;
-    isBusy: boolean;
-    isModelLoading: boolean;
-    progressItems: ProgressItem[];
-    start: (audioData: AudioBuffer | undefined) => void;
-    output?: TranscriberData;
     model: string;
     setModel: (model: string) => void;
     multilingual: boolean;
@@ -43,7 +48,7 @@ export interface Transcriber {
     setLanguage: (language: string) => void;
 }
 
-export function useTranscriber(): Transcriber {
+export function TranscriberProvider({ children }: PropsWithChildren<{}>) {
     const [transcript, setTranscript] = useState<TranscriberData | undefined>(
         undefined,
     );
@@ -184,5 +189,16 @@ export function useTranscriber(): Transcriber {
         language,
     ]);
 
-    return transcriber;
+    return <TranscriberContext value={transcriber}>{children}</TranscriberContext>
 }
+
+export function useTranscriber() {
+    return use(TranscriberContext)
+}
+
+const TranscriberContext = createContext<ITranscriber>({
+    isBusy: false,
+    isModelLoading: false,
+    progressItems: [],
+    start: () => { },
+})

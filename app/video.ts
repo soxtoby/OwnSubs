@@ -1,8 +1,9 @@
-import { redirect, useFetcher } from "react-router";
-import type { Route } from "./+types/video";
-import { setVideo } from "./storage";
-import { $path } from "safe-routes";
 import { useMemo } from "react";
+import { redirect, useFetcher } from "react-router";
+import { $path } from "safe-routes";
+import type { Route } from "./+types/video";
+import { selectFile } from "./DomUtils";
+import { setVideo } from "./storage";
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
     let formData = await request.formData()
@@ -19,6 +20,11 @@ export function useVideoFetcher() {
     let fetcher = useFetcher({ key: 'videoFile' })
 
     return useMemo(() => ({
+        async selectVideo() {
+            let file = await selectFile('video/*')
+            if (file)
+                this.setVideo(file)
+        },
         setVideo(file: File) {
             let form = new FormData()
             form.set('file', file)

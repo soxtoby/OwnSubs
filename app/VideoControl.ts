@@ -4,16 +4,16 @@ import { readAudioBuffer } from "./whisper/audioBuffer"
 
 export class VideoControl {
     constructor(
-        public readonly file: File | null,
+        public readonly file: File,
         private _videoElement: RefObject<HTMLVideoElement | null>
     ) {
-        this.src = file ? URL.createObjectURL(file) : null
+        this.src = URL.createObjectURL(file)
         this.audio = file
             ? readAudioBuffer(file)
             : null
     }
 
-    readonly src: string | null
+    readonly src: string
 
     readonly audio: Promise<AudioBuffer> | null
 

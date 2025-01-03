@@ -8,38 +8,41 @@ import type { VideoControl } from "./VideoControl"
 import { binarySearch } from "./utils"
 
 export interface ITimelinePanelProps {
-    subtitles: Subtitles
-    video: VideoControl
+    video?: VideoControl
+    subtitles?: Subtitles
 }
 
-export function TimelinePanel({ subtitles, video }: ITimelinePanelProps) {
-    let [videoDuration, setVideoDuration] = useState(video.duration)
-    let maxTime = Math.max(videoDuration, ...subtitles.cues.map(s => s.end))
+export function TimelinePanel({ video, subtitles }: ITimelinePanelProps) {
+    let [videoDuration, setVideoDuration] = useState(video?.duration ?? 0)
+    let maxTime = Math.max(videoDuration, ...(subtitles?.cues.map(s => s.end) ?? []))
     let raf = useRef(0)
 
     useEffect(() => {
-        video.addEventListener('durationchange', onDurationChange)
-        video.addEventListener('seeked', onSeeked)
-        video.addEventListener('playing', onPlaying)
-        video.addEventListener('pause', onPause)
-        return () => {
-            video.removeEventListener('durationchange', onDurationChange)
-            video.removeEventListener('seeked', onSeeked)
-            video.removeEventListener('playing', onPlaying)
-            video.removeEventListener('pause', onPause)
+        if (video) {
+            video.addEventListener('durationchange', onDurationChange)
+            video.addEventListener('seeked', onSeeked)
+            video.addEventListener('playing', onPlaying)
+            video.addEventListener('pause', onPause)
+            return () => {
+                video.removeEventListener('durationchange', onDurationChange)
+                video.removeEventListener('seeked', onSeeked)
+                video.removeEventListener('playing', onPlaying)
+                video.removeEventListener('pause', onPause)
+            }
         }
     })
 
     let playheadRef = useRef<HTMLDivElement>(null)
     let updatePlayheadPosition = useCallback(() => {
-        if (playheadRef.current) {
+        if (video && playheadRef.current) {
             playheadRef.current.style.transform = `translate3d(${video.currentTime * widthPerSecond}px, 0, 0)`
             playheadRef.current.classList.toggle('is-timeline-freeSpace', noCuesAtCurrentTime())
         }
     }, [video, subtitles])
 
     let seek = useCallback((seconds: number) => {
-        video.currentTime = seconds
+        if (video)
+            video.currentTime = seconds
         updatePlayheadPosition()
     }, [video, subtitles])
 
@@ -50,11 +53,11 @@ export function TimelinePanel({ subtitles, video }: ITimelinePanelProps) {
                     <Flex direction="column" width={`${maxTime * widthPerSecond}px`} minWidth="100%" height="100%" position="relative">
                         <TimelineTicks maxTime={maxTime} setTime={seek} />
                         <Box position="relative" py="2">
-                            {subtitles.cues.map((cue, index) =>
+                            {video && subtitles && subtitles.cues.map((cue, index) =>
                                 <TimelineCue key={cue.id} cue={cue} index={index} subtitles={subtitles} video={video} />
                             )}
                         </Box>
-                        {video.file &&
+                        {video &&
                             <div ref={playheadRef} className={'timeline-playhead' + (noCuesAtCurrentTime() ? ' is-timeline-freeSpace' : '')}>
                                 <Tooltip content="Add cue">
                                     <IconButton radius="full" size="1" className="timeline-addButton" onClick={insertCue}><PlusIcon /></IconButton>
@@ -68,18 +71,20 @@ export function TimelinePanel({ subtitles, video }: ITimelinePanelProps) {
     </Box>
 
     function noCuesAtCurrentTime(): boolean | undefined {
-        return !binarySearch(subtitles.cues, c =>
+        return !video || !subtitles || !binarySearch(subtitles.cues, c =>
             c.end + cueGap < video.currentTime ? -1
                 : c.start - cueGap - minDuration > video.currentTime ? 1
                     : 0)
     }
 
     function insertCue() {
-        subtitles.insert(createCue(video.currentTime, video.currentTime + 1, ''))
+        if (video && subtitles)
+            subtitles.insert(createCue(video.currentTime, video.currentTime + 1, ''))
     }
 
     function onDurationChange() {
-        setVideoDuration(video.duration)
+        if (video)
+            setVideoDuration(video.duration)
     }
 
     function onSeeked() {

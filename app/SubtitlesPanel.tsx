@@ -4,69 +4,48 @@ import { memo, useEffect, useRef } from "react"
 import { flushSync } from "react-dom"
 import { createCue, cueGap, Subtitles, timePrecision, type ICue } from "./Subtitles"
 import { TimeSpanField } from "./TimeSpanField"
+import { useVideoFetcher } from "./video"
 import type { VideoControl } from "./VideoControl"
-import type { Transcriber } from "./whisper/useTranscriber"
+import { useTranscriber } from "./whisper/Transcriber"
 
 export interface ISubtitlesPanelProps {
-    video: VideoControl
-    subtitles: Subtitles
-    transcriber: Transcriber
-    selectVideo: () => void
-    subsLoading: boolean
+    video?: VideoControl
+    subtitles?: Subtitles
 }
 
-export function SubtitlesPanel({ video, subtitles, transcriber, selectVideo, subsLoading }: ISubtitlesPanelProps) {
-    let lastActiveCueId = useRef(video.activeCue?.id)
+export function SubtitlesPanel({ video, subtitles }: ISubtitlesPanelProps) {
+    let lastActiveCueId = useRef(video?.activeCue?.id)
 
     useEffect(() => {
-        video.addEventListener('play', focusActiveCueText)
-        video.addSubtitlesEventListener('cuechange', onCueChange)
-        return () => {
-            video.removeEventListener('play', focusActiveCueText)
-            video.removeSubtitlesEventListener('cuechange', onCueChange)
+        if (video) {
+            video.addEventListener('play', focusActiveCueText)
+            video.addSubtitlesEventListener('cuechange', onCueChange)
+            return () => {
+                video.removeEventListener('play', focusActiveCueText)
+                video.removeSubtitlesEventListener('cuechange', onCueChange)
+            }
         }
     })
 
     return <Box p="2" flexGrow="2">
         <Card variant="classic" style={{ height: '100%', '--card-padding': '0px' }}>
-            {!video.file
-                ? <Flex align="center" justify="center" height="100%">
-                    <Flex gap="2" align="center"><Button onClick={selectVideo}><UploadIcon /> Load a video</Button> to get started</Flex>
-                </Flex>
-                : !subsLoading && subtitles.cues.length == 0
-                    ? <Flex align="center" justify="center" height="100%">
-                        <Flex align="center" gap="2">
-                            No subtitles yet. You can
-                            {video.audio &&
-                                <>
-                                    <Button onClick={async () => transcriber.start(await video.audio!)}><MagicWandIcon /> Transcribe</Button>
-                                    the video automatically, or
-                                </>}
-                            <Button onClick={() => subtitles.insert(createCue(0, 1, 'Your text here'))}><PlusIcon /> Add a cue</Button>
-                            to get started.
-                        </Flex>
-                    </Flex>
-                    : <ScrollArea scrollbars="vertical" size="3">
-                        <Box p="2">
-                            <Flex direction="column">
-                                {(subsLoading ? skeletonCues : subtitles.cues).map((cue, i) =>
-                                    <Cue key={cue.id} cue={cue} index={i} subtitles={subtitles} videoControl={video} loading={subsLoading} />
-                                )}
-                            </Flex>
-                        </Box>
-                    </ScrollArea>}
+            {!subtitles ? <Cues />
+                : !video ? <UploadVideoMessage />
+                    : subtitles.cues.length == 0 ? <NoSubsMessage video={video} subtitles={subtitles} />
+                        : <Cues video={video} subtitles={subtitles} />
+            }
         </Card>
     </Box>
 
     function onCueChange() {
-        if (video.activeCue && video.activeCue.id != lastActiveCueId.current) {
+        if (video && video.activeCue && video.activeCue.id != lastActiveCueId.current) {
             lastActiveCueId.current = video.activeCue.id
             focusActiveCueText()
         }
     }
 
     function focusActiveCueText() {
-        let cueText = video.activeCue && document.getElementById(cueElementId(video.activeCue))?.querySelector('textarea')
+        let cueText = video?.activeCue && document.getElementById(cueElementId(video.activeCue))?.querySelector('textarea')
         if (cueText) {
             cueText.focus()
             cueText.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -74,15 +53,62 @@ export function SubtitlesPanel({ video, subtitles, transcriber, selectVideo, sub
     }
 }
 
+function UploadVideoMessage() {
+    let videoFetcher = useVideoFetcher()
+
+    return <Flex align="center" justify="center" height="100%">
+        <Flex gap="2" align="center"><Button onClick={() => videoFetcher.selectVideo()}><UploadIcon /> Load a video</Button> to get started</Flex>
+    </Flex>
+}
+
+interface INoSubsMessageProps {
+    video: VideoControl
+    subtitles: Subtitles
+}
+
+function NoSubsMessage({ video, subtitles }: INoSubsMessageProps) {
+    let transcriber = useTranscriber()
+
+    return <Flex align="center" justify="center" height="100%">
+        <Flex align="center" gap="2">
+            No subtitles yet. You can
+            {video.audio &&
+                <>
+                    <Button onClick={async () => transcriber.start(await video.audio!)}><MagicWandIcon /> Transcribe</Button>
+                    the video automatically, or
+                </>}
+            <Button onClick={() => subtitles.insert(createCue(0, 1, 'Your text here'))}><PlusIcon /> Add a cue</Button>
+            to get started.
+        </Flex>
+    </Flex>
+}
+
+interface ICuesProps {
+    video?: VideoControl
+    subtitles?: Subtitles
+}
+
+function Cues({ video, subtitles }: ICuesProps) {
+    return <ScrollArea scrollbars="vertical" size="3">
+        <Box p="2">
+            <Flex direction="column">
+                {(subtitles?.cues ?? skeletonCues).map((cue, i) =>
+                    <Cue key={cue.id} cue={cue} index={i} subtitles={subtitles} video={video} />
+                )}
+            </Flex>
+        </Box>
+    </ScrollArea>
+}
+
 interface ICueProps {
     cue: ICue
     index: number
-    subtitles: Subtitles
-    videoControl: VideoControl
-    loading: boolean
+    video?: VideoControl
+    subtitles?: Subtitles
 }
 
-const Cue = memo(function Cue({ cue, index, subtitles, videoControl, loading }: ICueProps) {
+const Cue = memo(function Cue({ cue, index, video, subtitles }: ICueProps) {
+    let loading = !video || !subtitles
     return <Flex id={cueElementId(cue)} gap="2" p="2" align="stretch" className="cue">
         <Flex direction="column" justify="between">
             <Flex justify="between" align="center">
@@ -92,7 +118,7 @@ const Cue = memo(function Cue({ cue, index, subtitles, videoControl, loading }: 
                 <Flex gap="2" className="cue-actions">
                     <Tooltip content="Remove">
                         <Skeleton loading={loading}>
-                            <IconButton size="1" color="gray" variant="soft" onClick={() => subtitles.remove(cue.id)} >
+                            <IconButton size="1" color="gray" variant="soft" onClick={() => subtitles?.remove(cue.id)} >
                                 <TrashIcon />
                             </IconButton>
                         </Skeleton>
@@ -122,17 +148,17 @@ const Cue = memo(function Cue({ cue, index, subtitles, videoControl, loading }: 
                     value={cue.text}
                     onKeyDown={onTextKeyDown}
                     onChange={onTextChange}
-                    onFocus={() => videoControl.activeCue = cue}
+                    onFocus={() => video!.activeCue = cue}
                 />
             </Box>
         </Skeleton>
     </Flex>
 
     function onTextKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
-        if (!event.shiftKey) {
+        if (video && subtitles && !event.shiftKey) {
             if (event.key == ' ' && event.ctrlKey) {
                 event.preventDefault()
-                videoControl.isPlaying = !videoControl.isPlaying
+                video.isPlaying = !video.isPlaying
             } else if (event.key == 'Enter') {
                 event.preventDefault()
 
@@ -193,18 +219,24 @@ const Cue = memo(function Cue({ cue, index, subtitles, videoControl, loading }: 
     }
 
     function onTextChange(event: React.FormEvent<HTMLTextAreaElement>) {
-        videoControl.isPlaying = false
-        subtitles.setText(cue.id, event.currentTarget.value)
+        if (video && subtitles) {
+            video.isPlaying = false
+            subtitles.setText(cue.id, event.currentTarget.value)
+        }
     }
 
     function onStartTimeChange(seconds: number) {
-        videoControl.isPlaying = false
-        subtitles.setStart(cue.id, seconds)
+        if (video && subtitles) {
+            video.isPlaying = false
+            subtitles.setStart(cue.id, seconds)
+        }
     }
 
     function onEndTimeChange(seconds: number) {
-        videoControl.isPlaying = false
-        subtitles.setEnd(cue.id, seconds)
+        if (video && subtitles) {
+            video.isPlaying = false
+            subtitles.setEnd(cue.id, seconds)
+        }
     }
 
     function nextTextArea(textArea: HTMLTextAreaElement) {
