@@ -89,7 +89,7 @@ export function TimelinePanel({ video, subtitles }: ITimelinePanelProps) {
 
     function onSeeked() {
         updatePlayheadPosition()
-        playheadRef.current?.scrollIntoView({ behavior: 'smooth' })
+        playheadRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center' })
     }
 
     function onPlaying() {

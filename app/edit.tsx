@@ -4,8 +4,7 @@ import { useGlobalEventListener } from "./DomUtils";
 import { MainUI } from "./MainUI";
 import { Subtitles, readSubsFile } from "./Subtitles";
 import { VideoControl } from "./VideoControl";
-import { fileNameWithoutExtension, getSubs, getVideo } from "./storage";
-import { useSubsFetcher } from "./subs";
+import { fileNameWithoutExtension, getSubs, getVideo, setSubs } from "./storage";
 import { TranscriberProvider } from "./whisper/Transcriber";
 
 export async function clientLoader(args: Route.ClientLoaderArgs) {
@@ -27,8 +26,6 @@ export default function Edit({ loaderData: { videoFile, subsFile, cues }, params
 
     let subtitles = useMemo(() => new Subtitles(onCuesUpdated, cues), [cues])
 
-    let subsFetcher = useSubsFetcher()
-
     useGlobalEventListener('keydown', onKeyDown)
 
     return <TranscriberProvider>
@@ -38,7 +35,7 @@ export default function Edit({ loaderData: { videoFile, subsFile, cues }, params
     function onCuesUpdated(subtitles: Subtitles, committed: boolean) {
         rerender()
         if (subsFile && committed)
-            subsFetcher.setSubs(new File([subtitles.generateVTT()], subsFile.name), videoFile!.name)
+            setSubs(new File([subtitles.generateVTT()], subsFile.name), videoFile!.name)
     }
 
     function onKeyDown(event: KeyboardEvent) {

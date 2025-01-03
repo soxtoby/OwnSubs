@@ -1,13 +1,13 @@
 import { Card, Flex, Text } from "@radix-ui/themes";
 import { useState, type Ref } from "react";
 import { useMessageBox } from "./MessageBox";
-import { useSubsFetcher } from "./subs";
+import { useSubsFetcher } from "./SubsFetcher";
 import type { Subtitles } from "./Subtitles";
 import { SubtitlesPanel } from "./SubtitlesPanel";
 import { TimelinePanel } from "./TimelinePanel";
 import { Toolbar } from "./Toolbar";
-import { useVideoFetcher } from "./video";
 import type { VideoControl } from "./VideoControl";
+import { useVideoFetcher } from "./VideoFetcher";
 import { VideoPanel } from "./VideoPanel";
 
 export interface IMainUIProps {
@@ -67,7 +67,7 @@ export function MainUI({ fileName, videoRef, video, subtitles, loading }: IMainU
             videoFetcher.setVideo(file)
         } else if (file?.type == 'text/vtt') {
             if (video)
-                subsFetcher.setSubs(file, video.file.name)
+                subsFetcher.setSubsFile(file, video.file.name)
             else
                 alert({ title: "No video", message: "Please load a video before loading any subtitles." })
         } else {

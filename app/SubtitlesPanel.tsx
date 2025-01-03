@@ -4,8 +4,8 @@ import { memo, useEffect, useRef } from "react"
 import { flushSync } from "react-dom"
 import { createCue, cueGap, Subtitles, timePrecision, type ICue } from "./Subtitles"
 import { TimeSpanField } from "./TimeSpanField"
-import { useVideoFetcher } from "./video"
 import type { VideoControl } from "./VideoControl"
+import { useVideoFetcher } from "./VideoFetcher"
 import { useTranscriber } from "./whisper/Transcriber"
 
 export interface ISubtitlesPanelProps {

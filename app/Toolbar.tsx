@@ -2,12 +2,12 @@ import { ClipboardCopyIcon, DownloadIcon, UploadIcon } from "@radix-ui/react-ico
 import { Button, DropdownMenu, Flex, Tooltip } from "@radix-ui/themes"
 import { useState } from "react"
 import { selectFile } from "./DomUtils"
+import { subtitlesFileName } from "./storage"
+import { useSubsFetcher } from "./SubsFetcher"
 import { type Subtitles } from "./Subtitles"
 import { TranscribeButton } from "./TranscribeButton"
 import type { VideoControl } from "./VideoControl"
-import { subtitlesFileName } from "./storage"
-import { useSubsFetcher } from "./subs"
-import { useVideoFetcher } from "./video"
+import { useVideoFetcher } from "./VideoFetcher"
 
 interface IToolbarProps {
     fileName?: string
@@ -55,7 +55,7 @@ export function Toolbar({ fileName, subtitles, video }: IToolbarProps) {
     async function uploadSubtitles() {
         let file = await selectFile('text/vtt')
         if (file && file.type == 'text/vtt')
-            subsFetcher.setSubs(file, video!.file.name)
+            subsFetcher.setSubsFile(file, video!.file.name)
     }
 
     function downloadSubtitles() {
