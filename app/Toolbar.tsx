@@ -1,23 +1,25 @@
 import { ClipboardCopyIcon, DownloadIcon, UploadIcon } from "@radix-ui/react-icons"
 import { Button, DropdownMenu, Flex, Tooltip } from "@radix-ui/themes"
 import { useState } from "react"
-import type { Transcriber } from "./whisper/useTranscriber"
 import { selectFile } from "./DomUtils"
 import { type Subtitles } from "./Subtitles"
 import { TranscribeButton } from "./TranscribeButton"
 import type { VideoControl } from "./VideoControl"
 import { subtitlesFileName } from "./storage"
+import { useSubsFetcher } from "./subs"
+import type { Transcriber } from "./whisper/useTranscriber"
 
 interface IToolbarProps {
     video: VideoControl
     subtitles: Subtitles
     selectVideo: () => void
-    setSubsFile: (file: File) => void
     transcriber: Transcriber
 }
 
-export function Toolbar({ subtitles, video, selectVideo, setSubsFile, transcriber }: IToolbarProps) {
+export function Toolbar({ subtitles, video, selectVideo, transcriber }: IToolbarProps) {
     let [copied, setCopied] = useState(false)
+
+    let subsFetcher = useSubsFetcher()
 
     return <Flex gap="4" pt="2" px="2">
         {video.file
@@ -53,7 +55,7 @@ export function Toolbar({ subtitles, video, selectVideo, setSubsFile, transcribe
     async function uploadSubtitles() {
         let file = await selectFile('text/vtt')
         if (file && file.type == 'text/vtt')
-            setSubsFile(file)
+            subsFetcher.setSubs(file, video.file!.name)
     }
 
     function downloadSubtitles() {

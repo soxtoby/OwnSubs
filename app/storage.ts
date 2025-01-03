@@ -1,61 +1,18 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useCallback, useMemo } from "react"
-
 const directoryName = 'titleist'
 
-export function useFileStorage() {
-    let queryClient = useQueryClient()
-
-    let { data: videoFile, isLoading: videoLoading } = useQuery({
-        queryKey: ['videoFile'],
-        queryFn: () => getVideo(),
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-    })
-
-    let { data: subsFile, isLoading: subsLoading } = useQuery({
-        queryKey: ['subs', videoFile?.name],
-        queryFn: () => getSubs(videoFile!.name),
-        enabled: !!videoFile,
-        refetchOnReconnect: false,
-        refetchOnWindowFocus: false,
-    })
-
-    let setVideoFile = useCallback(async (videoFile: File) => {
-        await setVideo(videoFile)
-        queryClient.setQueryData(['videoFile'], videoFile)
-    }, [queryClient])
-
-    let setSubsFile = useCallback(async (subsFile: File) => {
-        if (videoFile) {
-            await setSubs(subsFile, videoFile.name)
-            queryClient.setQueryData(['subs', videoFile.name], subsFile)
-        }
-    }, [queryClient, videoFile])
-
-    return useMemo(() => ({
-        videoFile,
-        setVideoFile,
-        subsFile,
-        setSubsFile,
-        videoLoading,
-        subsLoading
-    }), [videoFile, setVideoFile, subsFile, setSubsFile, videoLoading, subsLoading])
-}
-
-async function getVideo() {
+export async function getVideo(predicate: (file: File) => boolean) {
     try {
-        return await (await findVideoFile())?.getFile() ?? null
+        return await (await findVideoFile(predicate))?.getFile() ?? null
     } catch (e) {
         console.error(e)
         return null
     }
 }
 
-async function setVideo(video: File) {
+export async function setVideo(video: File) {
     let appDirectory = await getOrCreateAppDirectory()
 
-    let existingFile = await findVideoFile()
+    let existingFile = await findVideoFile(() => true)
     if (existingFile)
         appDirectory.removeEntry(existingFile.name) // Only store 1 video at a time
 
@@ -65,15 +22,16 @@ async function setVideo(video: File) {
     await writable.close()
 }
 
-async function findVideoFile() {
+async function findVideoFile(predicate: (file: File) => boolean) {
     try {
         let appDirectory = await getOrCreateAppDirectory()
 
         for await (let entry of appDirectory.values()) {
             if (entry.kind == 'file') {
-                let file = await entry.getFile()
-                if (file.type.startsWith('video/'))
-                    return entry
+                let fileEntry = entry as FileSystemFileHandle
+                let file = await fileEntry.getFile()
+                if (file.type.startsWith('video/') && predicate(file))
+                    return fileEntry
             }
         }
     } catch (e) {
@@ -81,7 +39,7 @@ async function findVideoFile() {
     }
 }
 
-async function getSubs(videoFileName: string) {
+export async function getSubs(videoFileName: string) {
     try {
         let appDirectory = await getOrCreateAppDirectory()
         let subsFileHandle = await appDirectory.getFileHandle(subtitlesFileName(videoFileName), { create: true })
@@ -93,7 +51,7 @@ async function getSubs(videoFileName: string) {
     }
 }
 
-async function setSubs(subs: File, videoFileName: string) {
+export async function setSubs(subs: File, videoFileName: string) {
     let appDirectory = await getOrCreateAppDirectory()
     let subsFileHandle = await appDirectory.getFileHandle(subtitlesFileName(videoFileName), { create: true })
     let writable = await subsFileHandle.createWritable()
@@ -107,5 +65,9 @@ async function getOrCreateAppDirectory() {
 }
 
 export function subtitlesFileName(videoFileName: string) {
-    return videoFileName.replace(/\.[^.]+$/, '.vtt')
+    return fileNameWithoutExtension(videoFileName) + '.vtt'
+}
+
+export function fileNameWithoutExtension(fileName: string) {
+    return fileName.replace(/\.[^.]+$/, '')
 }

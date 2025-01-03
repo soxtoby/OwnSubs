@@ -6,7 +6,7 @@
     ".react-router/types/**/*"
   ],
   "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext", "DOM", "DOM.AsyncIterable"],
     "types": ["node", "vite/client"],
     "target": "ESNext",
     "module": "ES2022",

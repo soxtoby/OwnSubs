@@ -13,7 +13,7 @@ body {
     height: 100%;
 }
 
-.video-dragOverlay {
+.dragOverlay {
     position: absolute;
     inset: 0;
     background-color: var(--color-overlay);
