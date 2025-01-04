@@ -2,3 +2,5 @@ node_modules
 .react-router
 build
 .yalc
+yalc.lock
+*.local
