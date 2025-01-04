@@ -38,7 +38,9 @@ export function Toolbar({ fileName, subtitles, video }: IToolbarProps) {
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content>
                     <DropdownMenu.Item onClick={() => videoFetcher.selectVideo()}>Load new video&hellip;</DropdownMenu.Item>
-                    {video && <DropdownMenu.Item onClick={uploadSubtitles}>Load subtitles&hellip;</DropdownMenu.Item>}
+                    <DropdownMenu.Separator />
+                    <DropdownMenu.Item onClick={() => videoFetcher.selectVideo(fileName)}>Replace video&hellip;</DropdownMenu.Item>
+                    <DropdownMenu.Item onClick={uploadSubtitles}>Replace subtitles&hellip;</DropdownMenu.Item>
                     <DropdownMenu.Item color="red" onClick={() => videoFetcher.deleteVideo(fileName)}>Delete video</DropdownMenu.Item>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>

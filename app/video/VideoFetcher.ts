@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useFetcher } from "react-router"
 import { $path } from "safe-routes"
 import { selectFile } from "../DomUtils"
@@ -8,21 +8,22 @@ import type { clientAction } from "./VideoRoute"
 
 export function useVideoFetcher() {
     let fetcher = useFetcher<typeof clientAction>({ key: 'videoFile' })
+    let [saving, setSaving] = useState(null as null | { file: File, fileName: string })
 
     let helper = useMemo(() => ({
-        async selectVideo() {
+        async selectVideo(fileName?: string) {
             let file = await selectFile('video/*')
             if (file)
-                this.setVideo(file)
+                this.setVideo(file, fileName, !!fileName)
         },
-        setVideo(file: File, overwrite = false) {
+        setVideo(file: File, fileName?: string, overwrite = false) {
             let form = new FormData()
             form.set(fileKey, file)
+            fileName ??= fileNameWithoutExtension(file.name)
+            setSaving({ file, fileName })
             fetcher.submit(form, {
                 method: 'POST',
-                action: $path('/video/:fileName',
-                    { fileName: fileNameWithoutExtension(file.name) },
-                    { overwrite }),
+                action: $path('/video/:fileName', { fileName }, { overwrite }),
                 encType: 'multipart/form-data'
             })
         },
@@ -34,12 +35,19 @@ export function useVideoFetcher() {
 
     let { prompt } = useMessageBox()
     useEffect(() => {
-        if (fetcher.data?.alreadyExists) {
-            prompt({
-                title: "Video already exists",
-                message: "Video with the same name already exists. Do you want to overwrite it?",
-                confirm: "Overwrite",
-            }).then(() => helper.setVideo(fetcher.formData!.get('file') as File, true))
+        if (saving) {
+            if (fetcher.data?.alreadyExists) {
+                prompt({
+                    title: "Video already exists",
+                    message: "Video with the same name already exists. Do you want to overwrite it?",
+                    confirm: "Overwrite",
+                }).then(() => {
+                    helper.setVideo(saving.file, saving.fileName, true)
+                    setSaving(null)
+                })
+            } else {
+                setSaving(null)
+            }
         }
     }, [fetcher.data])
 
