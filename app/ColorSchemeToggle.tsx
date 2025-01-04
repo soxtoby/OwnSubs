@@ -1,5 +1,5 @@
 import { SunIcon } from "@radix-ui/react-icons";
-import { Box, IconButton, Tooltip, useThemeContext } from "@radix-ui/themes";
+import { Flex, IconButton, Tooltip } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 
 export function ColorSchemeToggle() {
@@ -10,13 +10,13 @@ export function ColorSchemeToggle() {
         document.body.classList.add(colorScheme)
     }, [colorScheme])
 
-    return <Box p="2">
+    return <Flex p="2">
         <Tooltip content="Toggle light/dark mode">
             <IconButton size="3" variant="ghost" onClick={() => toggleColorScheme()}>
                 <SunIcon />
             </IconButton>
         </Tooltip>
-    </Box>
+    </Flex>
 
     function toggleColorScheme() {
         let newScheme = colorScheme == 'light' ? 'dark' : 'light'

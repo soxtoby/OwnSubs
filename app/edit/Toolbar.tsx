@@ -27,9 +27,11 @@ export function Toolbar({ fileName, subtitles, video }: IToolbarProps) {
 
     return <Flex justify="between" pt="2" px="2">
         <Flex gap="4">
-            <Link to={$path('/')}>
-                <img src={logo} alt="OwnSubs logo" width="var(--space-6)" height="var(--space-6)" />
-            </Link>
+            <Flex asChild>
+                <Link to={$path('/')} style={{ fontSize: 0 }}>
+                    <img src={logo} alt="OwnSubs logo" width="var(--space-6)" height="var(--space-6)" />
+                </Link>
+            </Flex>
             {fileName
                 ? <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
