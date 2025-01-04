@@ -47,7 +47,7 @@ function IndexContent({ videos }: { videos: readonly IVideo[] }) {
                         <img src={title} />
                         <Flex direction="column" gap="2">
                             <Heading>Get started</Heading>
-                            <Flex gap="2" align="center"><Button onClick={() => videoFetcher.selectVideo()}><UploadIcon /> Load a video</Button> to create a new transcription.</Flex>
+                            <Flex gap="2" align="center"><Button onClick={() => videoFetcher.selectVideo()}><UploadIcon /> Load a video</Button> to create a new transcription. All data stays on your own device.</Flex>
                         </Flex>
                         {!!videos.length && <Flex direction="column" gap="2" mb="4">
                             <Heading>Your videos</Heading>
