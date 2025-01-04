@@ -3,6 +3,7 @@ import { useFetcher } from "react-router"
 import { $path } from "safe-routes"
 import { selectFile } from "../DomUtils"
 import { useMessageBox } from "../MessageBox"
+import { fileNameWithoutExtension } from "../storage"
 import type { clientAction } from "./VideoRoute"
 
 export function useVideoFetcher() {
@@ -17,9 +18,18 @@ export function useVideoFetcher() {
         setVideo(file: File, overwrite = false) {
             let form = new FormData()
             form.set(fileKey, file)
-            fetcher.submit(form, { method: 'POST', action: $path('/video', { overwrite }), encType: 'multipart/form-data' })
+            fetcher.submit(form, {
+                method: 'POST',
+                action: $path('/video/:fileName',
+                    { fileName: fileNameWithoutExtension(file.name) },
+                    { overwrite }),
+                encType: 'multipart/form-data'
+            })
         },
-        state: fetcher.state
+        async deleteVideo(fileName: string) {
+            await prompt({ title: "Delete video", message: `Are you sure you want to delete the "${fileName}" video and subtitles?`, confirm: "Delete" })
+            fetcher.submit(null, { method: 'DELETE', action: $path('/video/:fileName', { fileName }) })
+        }
     }), [fetcher])
 
     let { prompt } = useMessageBox()

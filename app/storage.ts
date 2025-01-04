@@ -9,10 +9,10 @@ export async function getVideo(predicate: (file: File) => boolean) {
     }
 }
 
-export async function setVideo(video: File, overwrite = false) {
+export async function setVideo(video: File, fileName: string, overwrite = false) {
     let appDirectory = await getOrCreateAppDirectory()
 
-    let existingFile = await findVideoFile(f => fileNameWithoutExtension(f.name) == fileNameWithoutExtension(video.name))
+    let existingFile = await findVideoFile(f => fileNameWithoutExtension(f.name) == fileName)
     if (existingFile) {
         if (overwrite)
             appDirectory.removeEntry(existingFile.name) // Avoid name conflicts
@@ -20,7 +20,7 @@ export async function setVideo(video: File, overwrite = false) {
             return false
     }
 
-    let videoHandle = await appDirectory.getFileHandle(video.name, { create: true })
+    let videoHandle = await appDirectory.getFileHandle(fileName + extension(video.name), { create: true })
     let writable = await videoHandle.createWritable()
     await writable.write(video)
     await writable.close()
@@ -83,6 +83,15 @@ export async function setSubs(subs: File, videoFileName: string) {
     await writable.close()
 }
 
+export async function deleteFile(fileName: string) {
+    let appDirectory = await getOrCreateAppDirectory()
+
+    for await (let entry of appDirectory.keys()) {
+        if (fileNameWithoutExtension(entry) == fileName)
+            await appDirectory.removeEntry(entry)
+    }
+}
+
 async function getOrCreateAppDirectory() {
     let root = await navigator.storage.getDirectory()
     return await root.getDirectoryHandle(directoryName, { create: true })
@@ -94,4 +103,8 @@ export function subtitlesFileName(videoFileName: string) {
 
 export function fileNameWithoutExtension(fileName: string) {
     return fileName.replace(/\.[^.]+$/, '')
+}
+
+function extension(fileName: string): string | undefined {
+    return fileName.match(/\.[^.]+$/)![0]
 }

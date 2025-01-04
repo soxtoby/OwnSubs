@@ -20,6 +20,7 @@ interface IMessageBoxState extends IPrompt {
     isPrompt: boolean
     resolve(): void
     reject(): void
+    closed?: boolean
 }
 
 export function MessageBoxProvider({ children }: PropsWithChildren<{}>) {
@@ -31,7 +32,7 @@ export function MessageBoxProvider({ children }: PropsWithChildren<{}>) {
 
     return <MessageBoxContext value={context}>
         {children}
-        <AlertDialog.Root open={!!current} onOpenChange={cancel}>
+        <AlertDialog.Root open={!!current && !current.closed} onOpenChange={cancel}>
             <AlertDialog.Content maxWidth="450px">
                 <AlertDialog.Title>{current?.title}</AlertDialog.Title>
                 <AlertDialog.Description size="2">{current?.message}</AlertDialog.Description>
@@ -55,13 +56,17 @@ export function MessageBoxProvider({ children }: PropsWithChildren<{}>) {
     </MessageBoxContext>
 
     function confirm() {
-        current?.resolve()
-        setCurrent(null)
+        if (current) {
+            current.resolve()
+            setCurrent({ ...current, closed: true })
+        }
     }
 
     function cancel() {
-        current?.reject()
-        setCurrent(null)
+        if (current && !current.closed) {
+            current?.reject()
+            setCurrent({ ...current, closed: true })
+        }
     }
 }
 

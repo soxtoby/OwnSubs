@@ -1,6 +1,8 @@
 import { ClipboardCopyIcon, DownloadIcon, UploadIcon } from "@radix-ui/react-icons"
 import { Button, DropdownMenu, Flex, Tooltip } from "@radix-ui/themes"
 import { useState } from "react"
+import { Link } from "react-router"
+import { $path } from "safe-routes"
 import { selectFile } from "../DomUtils"
 import { subtitlesFileName } from "../storage"
 import { useSubsFetcher } from "../subs/SubsFetcher"
@@ -8,6 +10,7 @@ import { useVideoFetcher } from "../video/VideoFetcher"
 import { type Subtitles } from "./Subtitles"
 import { TranscribeButton } from "./TranscribeButton"
 import type { VideoControl } from "./VideoControl"
+import logo from "/favicon.svg"
 
 interface IToolbarProps {
     fileName?: string
@@ -22,6 +25,9 @@ export function Toolbar({ fileName, subtitles, video }: IToolbarProps) {
     let subsFetcher = useSubsFetcher()
 
     return <Flex gap="4" pt="2" px="2">
+        <Link to={$path('/')}>
+            <img src={logo} alt="OwnSubs logo" width="var(--space-6)" height="var(--space-6)" />
+        </Link>
         {fileName
             ? <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
@@ -33,6 +39,7 @@ export function Toolbar({ fileName, subtitles, video }: IToolbarProps) {
                 <DropdownMenu.Content>
                     <DropdownMenu.Item onClick={() => videoFetcher.selectVideo()}>Load new video&hellip;</DropdownMenu.Item>
                     {video && <DropdownMenu.Item onClick={uploadSubtitles}>Load subtitles&hellip;</DropdownMenu.Item>}
+                    <DropdownMenu.Item color="red" onClick={() => videoFetcher.deleteVideo(fileName)}>Delete video</DropdownMenu.Item>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
             : <Button onClick={() => videoFetcher.selectVideo()}><UploadIcon /> Load a video</Button>
