@@ -1,5 +1,6 @@
 import { Flex, Skeleton } from "@radix-ui/themes"
 import { useEffect, useRef, useState, type Ref } from "react"
+import { emptyArray } from "../utils"
 import { toVTT, type Subtitles } from "./Subtitles"
 import type { VideoControl } from "./VideoControl"
 
@@ -29,7 +30,7 @@ export function VideoPanel({ videoRef, video, subtitles, loading }: IVideoPanelP
 
     useEffect(() => {
         if (subtitlesRef.current) {
-            for (let cue of Array.from(subtitlesRef.current.track.cues ?? []))
+            for (let cue of Array.from(subtitlesRef.current.track.cues ?? emptyArray))
                 subtitlesRef.current.track.removeCue(cue)
             for (let cue of subtitles!.cues)
                 subtitlesRef.current.track.addCue(toVTT(cue))

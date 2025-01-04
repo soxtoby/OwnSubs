@@ -6,6 +6,7 @@ import { $path } from "safe-routes";
 import type { Route } from "./+types/index";
 import { DropArea } from "./DropArea";
 import { fileNameWithoutExtension, index } from "./storage";
+import { emptyArray } from "./utils";
 import { useVideoFetcher } from "./video/VideoFetcher";
 import title from "/title.svg";
 
@@ -13,8 +14,12 @@ export async function clientLoader(args: Route.ClientLoaderArgs) {
     return { index: await index() }
 }
 
+export function HydrateFallback(props: Route.HydrateFallbackProps) {
+    return <IndexContent videos={emptyArray} />
+}
+
 export default function Index({ loaderData: { index } }: Route.ComponentProps) {
-    let [videos, setVideos] = useState([] as IVideo[])
+    let [videos, setVideos] = useState(emptyArray as IVideo[])
 
     useEffect(() => {
         setVideos(index.map(file => ({
@@ -27,6 +32,10 @@ export default function Index({ loaderData: { index } }: Route.ComponentProps) {
         return () => videos.forEach(v => URL.revokeObjectURL(v.src))
     }, [index])
 
+    return <IndexContent videos={videos} />
+}
+
+function IndexContent({ videos }: { videos: readonly IVideo[] }) {
     let videoFetcher = useVideoFetcher()
 
     return <ScrollArea size="3">

@@ -1,4 +1,5 @@
 import { createContext, use, useCallback, useMemo, useState, type PropsWithChildren } from "react";
+import { emptyArray } from "../utils";
 import * as Constants from "./constants";
 import Worker from "./worker.js?worker";
 
@@ -30,7 +31,7 @@ export interface TranscriberData {
 export interface ITranscriber {
     readonly isBusy: boolean;
     readonly isModelLoading: boolean;
-    readonly progressItems: ProgressItem[];
+    readonly progressItems: readonly ProgressItem[];
     start(audioData: AudioBuffer | undefined): void;
     readonly output?: TranscriberData;
 }
@@ -55,7 +56,7 @@ export function TranscriberProvider({ children }: PropsWithChildren<{}>) {
     const [isBusy, setIsBusy] = useState(false);
     const [isModelLoading, setIsModelLoading] = useState(false);
 
-    const [progressItems, setProgressItems] = useState<ProgressItem[]>([]);
+    const [progressItems, setProgressItems] = useState<readonly ProgressItem[]>(emptyArray);
 
     let [webWorker, setWebWorker] = useState<Worker | null>(null);
 
@@ -70,7 +71,7 @@ export function TranscriberProvider({ children }: PropsWithChildren<{}>) {
 
     const onInputChange = useCallback(() => {
         setTranscript(undefined);
-    }, []);
+    }, emptyArray);
 
     const postRequest = useCallback(
         async (audioData: AudioBuffer | undefined) => {
@@ -199,6 +200,6 @@ export function useTranscriber() {
 const TranscriberContext = createContext<ITranscriber>({
     isBusy: false,
     isModelLoading: false,
-    progressItems: [],
+    progressItems: emptyArray,
     start: () => { },
 })

@@ -28,7 +28,11 @@ export function useVideoFetcher() {
             })
         },
         async deleteVideo(fileName: string) {
-            await prompt({ title: "Delete video", message: `Are you sure you want to delete the "${fileName}" video and subtitles?`, confirm: "Delete" })
+            await prompt({
+                title: "Delete video",
+                message: `Are you sure you want to delete the "${fileName}" video and subtitles?`,
+                options: { confirm: "Delete" }
+            })
             fetcher.submit(null, { method: 'DELETE', action: $path('/video/:fileName', { fileName }) })
         }
     }), [fetcher])
@@ -40,7 +44,7 @@ export function useVideoFetcher() {
                 prompt({
                     title: "Video already exists",
                     message: "Video with the same name already exists. Do you want to overwrite it?",
-                    confirm: "Overwrite",
+                    options: { confirm: "Overwrite" },
                 }).then(() => {
                     helper.setVideo(saving.file, saving.fileName, true)
                     setSaving(null)

@@ -1,6 +1,7 @@
 import type { RefObject } from "react"
 import { readAudioBuffer } from "../whisper/audioBuffer"
 import { fromVTT, type ICue } from "./Subtitles"
+import { emptyArray } from "../utils"
 
 export class VideoControl {
     constructor(
@@ -42,7 +43,7 @@ export class VideoControl {
     }
 
     get activeCue() {
-        let activeCues = Array.from(this.video?.textTracks[0]?.activeCues ?? [])
+        let activeCues = Array.from(this.video?.textTracks[0]?.activeCues ?? emptyArray)
         let lastActiveCue = activeCues.at(-1) as VTTCue | undefined
         return lastActiveCue && fromVTT(lastActiveCue)
     }

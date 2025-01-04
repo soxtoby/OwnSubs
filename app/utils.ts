@@ -1,4 +1,4 @@
-export function binarySearch<T>(items: T[], compare: (item: T) => number) {
+export function binarySearch<T>(items: readonly T[], compare: (item: T) => number) {
     let low = 0, high = items.length
     while (low < high) {
         let mid = low + high >> 1
@@ -11,3 +11,5 @@ export function binarySearch<T>(items: T[], compare: (item: T) => number) {
             return items[mid]
     }
 }
+
+export const emptyArray = Object.freeze([]) as readonly any[]

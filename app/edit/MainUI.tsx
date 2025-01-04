@@ -19,7 +19,7 @@ export interface IMainUIProps {
 export function MainUI({ fileName, videoRef, video, subtitles, loading, children }: PropsWithChildren<IMainUIProps>) {
     return <Flex direction="column" height="100%">
         <Toolbar fileName={fileName} video={video} subtitles={subtitles} />
-        <DropArea videoFileName={video?.file.name}>
+        <DropArea fileName={fileName} hasSubtitles={!!subtitles?.cues.length}>
             <Flex flexGrow="1" direction="column" overflow="hidden">
                 <Flex flexGrow="1" align="stretch" overflow="hidden">
                     <SubtitlesPanel video={video} subtitles={subtitles}>{children}</SubtitlesPanel>

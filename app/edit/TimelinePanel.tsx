@@ -2,7 +2,7 @@ import { PlusIcon } from "@radix-ui/react-icons"
 import { Box, Card, Flex, IconButton, Inset, ScrollArea, Text, Tooltip } from "@radix-ui/themes"
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { addClass } from "../DomUtils"
-import { binarySearch } from "../utils"
+import { binarySearch, emptyArray } from "../utils"
 import { createCue, cueGap, minDuration, timePrecision, type ICue, type Subtitles } from "./Subtitles"
 import { timeSpan } from "./TimeSpanField"
 import type { VideoControl } from "./VideoControl"
@@ -14,7 +14,7 @@ export interface ITimelinePanelProps {
 
 export function TimelinePanel({ video, subtitles }: ITimelinePanelProps) {
     let [videoDuration, setVideoDuration] = useState(video?.duration ?? 0)
-    let maxTime = Math.max(videoDuration, ...(subtitles?.cues.map(s => s.end) ?? []))
+    let maxTime = Math.max(videoDuration, ...(subtitles?.cues.map(s => s.end) ?? emptyArray))
     let raf = useRef(0)
 
     useEffect(() => {

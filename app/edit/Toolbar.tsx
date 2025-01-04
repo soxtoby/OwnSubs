@@ -64,7 +64,7 @@ export function Toolbar({ fileName, subtitles, video }: IToolbarProps) {
     async function uploadSubtitles() {
         let file = await selectFile('text/vtt')
         if (file && file.type == 'text/vtt')
-            subsFetcher.setSubsFile(file, video!.file.name)
+            subsFetcher.setSubsFile(file, fileName!)
     }
 
     function downloadSubtitles() {
@@ -72,7 +72,7 @@ export function Toolbar({ fileName, subtitles, video }: IToolbarProps) {
         let url = URL.createObjectURL(blob)
         let a = document.createElement('a')
         a.href = url
-        a.download = subtitlesFileName(video!.file.name)
+        a.download = subtitlesFileName(fileName!)
         a.click()
         URL.revokeObjectURL(url)
     }

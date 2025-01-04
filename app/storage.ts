@@ -63,10 +63,10 @@ export async function index() {
         .map(([name, video]) => ({ name, video, lastModified: new Date(Math.max(video.lastModified, subtitles.get(name)?.lastModified ?? 0)) }))
 }
 
-export async function getSubs(videoFileName: string) {
+export async function getSubs(fileName: string) {
     try {
         let appDirectory = await getOrCreateAppDirectory()
-        let subsFileHandle = await appDirectory.getFileHandle(subtitlesFileName(videoFileName), { create: true })
+        let subsFileHandle = await appDirectory.getFileHandle(subtitlesFileName(fileName), { create: true })
         let file = await subsFileHandle.getFile()
         return file
     } catch (e) {
@@ -75,9 +75,9 @@ export async function getSubs(videoFileName: string) {
     }
 }
 
-export async function setSubs(subs: File, videoFileName: string) {
+export async function setSubs(subs: File, fileName: string) {
     let appDirectory = await getOrCreateAppDirectory()
-    let subsFileHandle = await appDirectory.getFileHandle(subtitlesFileName(videoFileName), { create: true })
+    let subsFileHandle = await appDirectory.getFileHandle(subtitlesFileName(fileName), { create: true })
     let writable = await subsFileHandle.createWritable()
     await writable.write(subs)
     await writable.close()
@@ -97,8 +97,8 @@ async function getOrCreateAppDirectory() {
     return await root.getDirectoryHandle(directoryName, { create: true })
 }
 
-export function subtitlesFileName(videoFileName: string) {
-    return fileNameWithoutExtension(videoFileName) + '.vtt'
+export function subtitlesFileName(fileName: string) {
+    return fileNameWithoutExtension(fileName) + '.vtt'
 }
 
 export function fileNameWithoutExtension(fileName: string) {

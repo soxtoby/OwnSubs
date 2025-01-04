@@ -8,13 +8,14 @@ import { MainUI } from "./MainUI";
 import { readSubsFile, Subtitles } from "./Subtitles";
 import { MissingVideoMessage } from "./SubtitlesPanel";
 import { VideoControl } from "./VideoControl";
+import { emptyArray } from "../utils";
 
-export async function clientLoader(args: Route.ClientLoaderArgs) {
-    let videoFile = await getVideo(file => fileNameWithoutExtension(file.name) == args.params.fileName)
+export async function clientLoader({ params: { fileName } }: Route.ClientLoaderArgs) {
+    let videoFile = await getVideo(file => fileNameWithoutExtension(file.name) == fileName)
     if (!videoFile)
         throw data("Video not found", { status: 404 })
-    let subsFile = videoFile && await getSubs(videoFile.name)
-    let cues = subsFile ? await readSubsFile(subsFile) : []
+    let subsFile = videoFile && await getSubs(fileName)
+    let cues = subsFile ? await readSubsFile(subsFile) : emptyArray
     return { videoFile, subsFile, cues } as const
 }
 
@@ -46,7 +47,7 @@ export default function Edit({ loaderData: { videoFile, subsFile, cues }, params
     function onCuesUpdated(subtitles: Subtitles, committed: boolean) {
         rerender()
         if (subsFile && committed)
-            setSubs(new File([subtitles.generateVTT()], subsFile.name), videoFile!.name)
+            setSubs(new File([subtitles.generateVTT()], subsFile.name), fileName)
     }
 
     function onKeyDown(event: KeyboardEvent) {

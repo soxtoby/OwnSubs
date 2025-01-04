@@ -3,7 +3,7 @@ import { createContext, use, useMemo, useState, type PropsWithChildren } from "r
 
 export interface IMessageBoxContext {
     alert(message: IMessage): void
-    prompt(message: IPrompt): Promise<void>
+    prompt<Option extends string>(message: IPrompt<Option>): Promise<Option>
 }
 
 export interface IMessage {
@@ -11,23 +11,30 @@ export interface IMessage {
     message: string
 }
 
-export interface IPrompt extends IMessage {
-    confirm?: string
-    cancel?: string
+export interface IPrompt<Option extends string> extends IMessage {
+    options?: Record<Option, string>
 }
 
-interface IMessageBoxState extends IPrompt {
-    isPrompt: boolean
-    resolve(): void
+interface IMessageBoxState<Option extends string> extends IPrompt<Option> {
+    resolve(choice: Option): void
     reject(): void
     closed?: boolean
 }
 
 export function MessageBoxProvider({ children }: PropsWithChildren<{}>) {
-    let [current, setCurrent] = useState<IMessageBoxState | null>(null)
+    let [current, setCurrent] = useState<IMessageBoxState<any> | null>(null)
     let context = useMemo(() => ({
-        alert: (message: IMessage) => setCurrent({ ...message, isPrompt: false, resolve() { }, reject() { } }),
-        prompt: (message: IMessage) => new Promise<void>((resolve, reject) => setCurrent({ ...message, isPrompt: true, resolve, reject }))
+        alert: (message: IMessage) => setCurrent({
+            ...message,
+            resolve() { },
+            reject() { }
+        }),
+        prompt: <Option extends string>(message: IPrompt<Option>) => new Promise<Option>((resolve, reject) => setCurrent({
+            options: { ok: "OK" },
+            ...message,
+            resolve,
+            reject
+        }))
     }), [setCurrent])
 
     return <MessageBoxContext value={context}>
@@ -37,13 +44,15 @@ export function MessageBoxProvider({ children }: PropsWithChildren<{}>) {
                 <AlertDialog.Title>{current?.title}</AlertDialog.Title>
                 <AlertDialog.Description size="2">{current?.message}</AlertDialog.Description>
                 <Flex gap="2" mt="4" justify="end">
-                    {current?.isPrompt
+                    {current?.options
                         ? <>
-                            <AlertDialog.Action>
-                                <Button onClick={confirm}>{current.confirm ?? "OK"}</Button>
-                            </AlertDialog.Action>
+                            {Object.entries(current.options).map(([option, caption]) =>
+                                <AlertDialog.Action key={option}>
+                                    <Button onClick={() => confirm(option)}>{caption}</Button>
+                                </AlertDialog.Action>
+                            )}
                             <AlertDialog.Cancel>
-                                <Button variant="soft">{current.cancel ?? "Cancel"}</Button>
+                                <Button variant="soft">{"Cancel"}</Button>
                             </AlertDialog.Cancel>
                         </>
                         : <AlertDialog.Cancel>
@@ -55,9 +64,9 @@ export function MessageBoxProvider({ children }: PropsWithChildren<{}>) {
         </AlertDialog.Root>
     </MessageBoxContext>
 
-    function confirm() {
+    function confirm(option: string) {
         if (current) {
-            current.resolve()
+            current.resolve(option)
             setCurrent({ ...current, closed: true })
         }
     }
@@ -72,4 +81,4 @@ export function MessageBoxProvider({ children }: PropsWithChildren<{}>) {
 
 export function useMessageBox() { return use(MessageBoxContext) }
 
-const MessageBoxContext = createContext<IMessageBoxContext>({ alert() { }, async prompt() { } })
+const MessageBoxContext = createContext<IMessageBoxContext>({ alert: () => { }, prompt: () => Promise.reject() })

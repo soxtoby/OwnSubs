@@ -1,3 +1,4 @@
+import { emptyArray } from "../utils"
 import { timeSpan } from "./TimeSpanField"
 
 export interface ICue {
@@ -8,13 +9,13 @@ export interface ICue {
 }
 
 export class Subtitles {
-    private _pendingCues: ICue[] | undefined
-    private _history: ICue[][] = []
+    private _pendingCues: readonly ICue[] | undefined
+    private _history: (readonly ICue[])[] = []
     private _currentHistoryIndex = 0
 
     constructor(
         private _onCuesUpdated: (subtitles: Subtitles, committed: boolean) => void,
-        initialCues: ICue[] = []
+        initialCues: readonly ICue[] = emptyArray
     ) {
         this._history.push(initialCues)
     }
@@ -22,7 +23,7 @@ export class Subtitles {
     get cues() {
         return this._pendingCues
             ?? this._history.at(this._currentHistoryIndex)
-            ?? []
+            ?? emptyArray
     }
 
     get(cueId: string) {
@@ -82,7 +83,7 @@ export class Subtitles {
         this.splice(cueId, 1, [replacement], commit)
     }
 
-    splice(cueId: string, deleteCount: number, replacements: ICue[] = [], commit = true) {
+    splice(cueId: string, deleteCount: number, replacements: readonly ICue[] = emptyArray, commit = true) {
         this.update(cues => {
             let index = cues.findIndex(c => c.id == cueId)
             return index >= 0
@@ -111,7 +112,7 @@ export class Subtitles {
         }, commit)
     }
 
-    private update(update: (cues: ICue[]) => ICue[], commit = true) {
+    private update(update: (cues: readonly ICue[]) => readonly ICue[], commit = true) {
         this._pendingCues = update(this.cues)
         if (commit)
             this.commit()
@@ -175,7 +176,7 @@ export function createCue(start: number, end: number, text: string): ICue {
     }
 }
 
-export function readSubsFile(file: File): Promise<ICue[]> {
+export function readSubsFile(file: File): Promise<readonly ICue[]> {
     return new Promise((resolve, reject) => {
         let video = document.createElement('video')
         video.style.display = 'none'
@@ -184,12 +185,12 @@ export function readSubsFile(file: File): Promise<ICue[]> {
         video.appendChild(track)
         track.src = URL.createObjectURL(file)
         track.onload = () => {
-            let cues = (Array.from(track.track.cues ?? []) as VTTCue[]).map(fromVTT)
+            let cues = (Array.from(track.track.cues ?? emptyArray) as VTTCue[]).map(fromVTT)
             URL.revokeObjectURL(track.src)
             video.remove()
             resolve(cues)
         }
-        track.onerror = () => resolve([])
+        track.onerror = () => resolve(emptyArray)
     })
 }
 

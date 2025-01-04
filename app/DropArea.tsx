@@ -5,15 +5,16 @@ import { useSubsFetcher } from "./subs/SubsFetcher"
 import { useVideoFetcher } from "./video/VideoFetcher"
 
 export interface IDropAreaProps {
-    videoFileName?: string
+    fileName?: string
+    hasSubtitles?: boolean
 }
 
-export function DropArea({ videoFileName, children }: PropsWithChildren<IDropAreaProps>) {
+export function DropArea({ fileName, hasSubtitles, children }: PropsWithChildren<IDropAreaProps>) {
     let [isDraggingOver, setIsDraggingOver] = useState(false)
 
     let videoFetcher = useVideoFetcher()
     let subsFetcher = useSubsFetcher()
-    let { alert } = useMessageBox()
+    let { alert, prompt } = useMessageBox()
 
     return <Slot onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
         <Slottable>{children}</Slottable>
@@ -51,12 +52,30 @@ export function DropArea({ videoFileName, children }: PropsWithChildren<IDropAre
         let file = event.dataTransfer.files[0]
 
         if (file?.type.startsWith("video/")) {
-            videoFetcher.setVideo(file)
+            if (fileName) {
+                let choice = await prompt({
+                    title: "Replace video",
+                    message: "Do you want to replace the current video, or create a new one?",
+                    options: { replace: "Replace", create: "Create new" }
+                })
+                videoFetcher.setVideo(file, choice == 'replace' ? fileName : undefined, choice == 'replace')
+            } else {
+                videoFetcher.setVideo(file)
+            }
         } else if (file?.type == 'text/vtt') {
-            if (videoFileName)
-                subsFetcher.setSubsFile(file, videoFileName)
-            else
+            if (fileName) {
+                if (hasSubtitles) {
+                    await prompt({
+                        title: 'Replace subtitles',
+                        message: 'Do you want to replace the current subtitles?',
+                        options: { replace: 'Replace' }
+                    })
+                }
+                subsFetcher.setSubsFile(file, fileName)
+            }
+            else {
                 alert({ title: "No video", message: "Please load a video before loading any subtitles." })
+            }
         } else {
             alert({ title: "Invalid file", message: "Please drop a video or subtitles file." })
         }

@@ -4,5 +4,5 @@ export default [
     index('./index.tsx'),
     route('/edit/:fileName', './edit/EditRoute.tsx'),
     route('/video/:fileName', './video/VideoRoute.ts'),
-    route('/subs/:videoFileName', './subs/SubsRoute.ts'),
+    route('/subs/:fileName', './subs/SubsRoute.ts'),
 ] satisfies RouteConfig
