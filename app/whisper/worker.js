@@ -1,4 +1,3 @@
- 
 import { pipeline, WhisperTextStreamer } from "@huggingface/transformers";
 
 // Define model factories
@@ -35,16 +34,24 @@ class PipelineFactory {
 self.addEventListener("message", async (event) => {
     const message = event.data;
 
-    // Do some work...
-    // TODO use message data
-    let transcript = await transcribe(message);
-    if (transcript === null) return;
+    try {
+        // Do some work...
+        // TODO use message data
+        let transcript = await transcribe(message);
+        if (transcript === null) return;
 
-    // Send the result back to the main thread
-    self.postMessage({
-        status: "complete",
-        data: transcript,
-    });
+        // Send the result back to the main thread
+        self.postMessage({
+            status: "complete",
+            data: transcript,
+        });
+    } catch (error) {
+        console.error(error);
+        self.postMessage({
+            status: "error",
+            data: error,
+        });
+    }
 });
 
 class AutomaticSpeechRecognitionPipelineFactory extends PipelineFactory {
