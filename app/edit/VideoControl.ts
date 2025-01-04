@@ -7,13 +7,10 @@ export class VideoControl {
         public readonly file: File,
         private _videoElement: RefObject<HTMLVideoElement | null>
     ) {
-        this.src = URL.createObjectURL(file)
         this.audio = file
             ? readAudioBuffer(file)
             : null
     }
-
-    readonly src: string
 
     readonly audio: Promise<AudioBuffer> | null
 

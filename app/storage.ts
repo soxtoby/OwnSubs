@@ -12,9 +12,9 @@ export async function getVideo(predicate: (file: File) => boolean) {
 export async function setVideo(video: File) {
     let appDirectory = await getOrCreateAppDirectory()
 
-    let existingFile = await findVideoFile(() => true)
+    let existingFile = await findVideoFile(f => fileNameWithoutExtension(f.name) == fileNameWithoutExtension(video.name))
     if (existingFile)
-        appDirectory.removeEntry(existingFile.name) // Only store 1 video at a time
+        appDirectory.removeEntry(existingFile.name) // Avoid name conflicts
 
     let videoHandle = await appDirectory.getFileHandle(video.name, { create: true })
     let writable = await videoHandle.createWritable()
@@ -37,6 +37,25 @@ async function findVideoFile(predicate: (file: File) => boolean) {
     } catch (e) {
         console.error(e)
     }
+}
+
+export async function index() {
+    let appDirectory = await getOrCreateAppDirectory()
+
+    let videos = new Map<string, File>()
+    let subtitles = new Map<string, File>()
+    for await (let entry of appDirectory.values()) {
+        if (entry.kind == 'file') {
+            let fileEntry = entry as FileSystemFileHandle
+            let file = await fileEntry.getFile()
+            if (file.type.startsWith('video/'))
+                videos.set(fileNameWithoutExtension(file.name), file)
+            else if (file.type == 'text/vtt')
+                subtitles.set(fileNameWithoutExtension(file.name), file)
+        }
+    }
+    return Array.from(videos)
+        .map(([name, video]) => ({ name, video, lastModified: new Date(Math.max(video.lastModified, subtitles.get(name)?.lastModified ?? 0)) }))
 }
 
 export async function getSubs(videoFileName: string) {

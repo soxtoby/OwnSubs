@@ -17,6 +17,19 @@ body {
     position: absolute;
     inset: 0;
     background-color: var(--color-overlay);
+
+    .rt-Card {
+        --card-background-color: var(--color-panel-solid);
+    }
+}
+
+.videoCard {
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+        --card-background-color: var(--focus-4);
+    }
 }
 
 video {
