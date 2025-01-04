@@ -25,7 +25,7 @@ export function VideoPanel({ videoRef, video, subtitles, loading }: IVideoPanelP
                     URL.revokeObjectURL(videoSrc)
             }
         }
-    }, [video?.file])
+    }, [video?.file.lastModified])
 
     useEffect(() => {
         if (subtitlesRef.current) {

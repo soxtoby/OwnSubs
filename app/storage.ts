@@ -9,17 +9,22 @@ export async function getVideo(predicate: (file: File) => boolean) {
     }
 }
 
-export async function setVideo(video: File) {
+export async function setVideo(video: File, overwrite = false) {
     let appDirectory = await getOrCreateAppDirectory()
 
     let existingFile = await findVideoFile(f => fileNameWithoutExtension(f.name) == fileNameWithoutExtension(video.name))
-    if (existingFile)
-        appDirectory.removeEntry(existingFile.name) // Avoid name conflicts
+    if (existingFile) {
+        if (overwrite)
+            appDirectory.removeEntry(existingFile.name) // Avoid name conflicts
+        else
+            return false
+    }
 
     let videoHandle = await appDirectory.getFileHandle(video.name, { create: true })
     let writable = await videoHandle.createWritable()
     await writable.write(video)
     await writable.close()
+    return true
 }
 
 async function findVideoFile(predicate: (file: File) => boolean) {

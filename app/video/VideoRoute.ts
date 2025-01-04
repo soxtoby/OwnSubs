@@ -1,16 +1,24 @@
 import { redirect } from "react-router";
 import { $path } from "safe-routes";
+import { file, object, optional, parse, pipe, string, transform, type InferOutput } from "valibot";
 import { fileNameWithoutExtension, setVideo } from "../storage";
 import type { Route } from "./+types/VideoRoute";
-import { fileKey } from "./VideoFetcher";
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
-    let formData = await request.formData()
-    let file = formData.get(fileKey)
-    if (file instanceof File) {
-        await setVideo(file)
-        return redirect($path('/edit/:fileName', { fileName: fileNameWithoutExtension(file.name) }))
-    } else {
-        throw new Error('No file uploaded')
-    }
+    let { file } = parse(Form, Object.fromEntries(await request.formData()))
+    let { overwrite } = parse(SearchParams, Object.fromEntries(new URL(request.url).searchParams))
+    let success = await setVideo(file, overwrite);
+    return success
+        ? redirect($path('/edit/:fileName', { fileName: fileNameWithoutExtension(file.name) }))
+        : { alreadyExists: true }
 }
+
+const Form = object({
+    file: file("No file uploaded")
+})
+
+const SearchParams = object({
+    overwrite: pipe(optional(string()), transform(s => s == 'false' ? false : Boolean(s)))
+})
+
+export type SearchParams = InferOutput<typeof SearchParams>

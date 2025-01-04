@@ -12,7 +12,8 @@
         "react": "*",
         "react-dom": "*",
         "react-router": "*",
-        "safe-routes": "*", 
+        "safe-routes": "*",
+        "valibot": "*",
       },
       "devDependencies": {
         "@react-router/dev": "*",

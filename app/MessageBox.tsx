@@ -3,6 +3,7 @@ import { createContext, use, useMemo, useState, type PropsWithChildren } from "r
 
 export interface IMessageBoxContext {
     alert(message: IMessage): void
+    prompt(message: IPrompt): Promise<void>
 }
 
 export interface IMessage {
@@ -10,26 +11,60 @@ export interface IMessage {
     message: string
 }
 
+export interface IPrompt extends IMessage {
+    confirm?: string
+    cancel?: string
+}
+
+interface IMessageBoxState extends IPrompt {
+    isPrompt: boolean
+    resolve(): void
+    reject(): void
+}
+
 export function MessageBoxProvider({ children }: PropsWithChildren<{}>) {
-    let [message, setMessage] = useState<IMessage | null>(null)
-    let context = useMemo(() => ({ alert: setMessage }), [setMessage])
+    let [current, setCurrent] = useState<IMessageBoxState | null>(null)
+    let context = useMemo(() => ({
+        alert: (message: IMessage) => setCurrent({ ...message, isPrompt: false, resolve() { }, reject() { } }),
+        prompt: (message: IMessage) => new Promise<void>((resolve, reject) => setCurrent({ ...message, isPrompt: true, resolve, reject }))
+    }), [setCurrent])
 
     return <MessageBoxContext value={context}>
         {children}
-        <AlertDialog.Root open={!!message} onOpenChange={() => setMessage(null)}>
+        <AlertDialog.Root open={!!current} onOpenChange={cancel}>
             <AlertDialog.Content maxWidth="450px">
-                <AlertDialog.Title>{message?.title}</AlertDialog.Title>
-                <AlertDialog.Description size="2">{message?.message}</AlertDialog.Description>
+                <AlertDialog.Title>{current?.title}</AlertDialog.Title>
+                <AlertDialog.Description size="2">{current?.message}</AlertDialog.Description>
                 <Flex gap="2" mt="4" justify="end">
-                    <AlertDialog.Cancel>
-                        <Button>OK</Button>
-                    </AlertDialog.Cancel>
+                    {current?.isPrompt
+                        ? <>
+                            <AlertDialog.Action>
+                                <Button onClick={confirm}>{current.confirm ?? "OK"}</Button>
+                            </AlertDialog.Action>
+                            <AlertDialog.Cancel>
+                                <Button variant="soft">{current.cancel ?? "Cancel"}</Button>
+                            </AlertDialog.Cancel>
+                        </>
+                        : <AlertDialog.Cancel>
+                            <Button>OK</Button>
+                        </AlertDialog.Cancel>
+                    }
                 </Flex>
             </AlertDialog.Content>
         </AlertDialog.Root>
     </MessageBoxContext>
+
+    function confirm() {
+        current?.resolve()
+        setCurrent(null)
+    }
+
+    function cancel() {
+        current?.reject()
+        setCurrent(null)
+    }
 }
 
 export function useMessageBox() { return use(MessageBoxContext) }
 
-const MessageBoxContext = createContext<IMessageBoxContext>({ alert() { } })
+const MessageBoxContext = createContext<IMessageBoxContext>({ alert() { }, async prompt() { } })
