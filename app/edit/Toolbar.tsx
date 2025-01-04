@@ -3,6 +3,7 @@ import { Button, DropdownMenu, Flex, Tooltip } from "@radix-ui/themes"
 import { useState } from "react"
 import { Link } from "react-router"
 import { $path } from "safe-routes"
+import { ColorSchemeToggle } from "../ColorSchemeToggle"
 import { selectFile } from "../DomUtils"
 import { subtitlesFileName } from "../storage"
 import { useSubsFetcher } from "../subs/SubsFetcher"
@@ -24,33 +25,36 @@ export function Toolbar({ fileName, subtitles, video }: IToolbarProps) {
     let videoFetcher = useVideoFetcher()
     let subsFetcher = useSubsFetcher()
 
-    return <Flex gap="4" pt="2" px="2">
-        <Link to={$path('/')}>
-            <img src={logo} alt="OwnSubs logo" width="var(--space-6)" height="var(--space-6)" />
-        </Link>
-        {fileName
-            ? <DropdownMenu.Root>
-                <DropdownMenu.Trigger>
-                    <Button variant="soft">
-                        {fileName}
-                        <DropdownMenu.TriggerIcon />
-                    </Button>
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Content>
-                    <DropdownMenu.Item onClick={() => videoFetcher.selectVideo()}>Load new video&hellip;</DropdownMenu.Item>
-                    <DropdownMenu.Separator />
-                    <DropdownMenu.Item onClick={() => videoFetcher.selectVideo(fileName)}>Replace video&hellip;</DropdownMenu.Item>
-                    <DropdownMenu.Item onClick={uploadSubtitles}>Replace subtitles&hellip;</DropdownMenu.Item>
-                    <DropdownMenu.Item color="red" onClick={() => videoFetcher.deleteVideo(fileName)}>Delete video</DropdownMenu.Item>
-                </DropdownMenu.Content>
-            </DropdownMenu.Root>
-            : <Button onClick={() => videoFetcher.selectVideo()}><UploadIcon /> Load a video</Button>
-        }
-        <Tooltip content={copied ? "Copied!" : null} open={copied}>
-            <Button onClick={copyTranscript} disabled={!video}><ClipboardCopyIcon /> Copy transcript</Button>
-        </Tooltip>
-        <Button onClick={downloadSubtitles} disabled={!video}><DownloadIcon /> Download subtitles</Button>
-        <TranscribeButton subtitles={subtitles} video={video} />
+    return <Flex justify="between" pt="2" px="2">
+        <Flex gap="4">
+            <Link to={$path('/')}>
+                <img src={logo} alt="OwnSubs logo" width="var(--space-6)" height="var(--space-6)" />
+            </Link>
+            {fileName
+                ? <DropdownMenu.Root>
+                    <DropdownMenu.Trigger>
+                        <Button variant="soft">
+                            {fileName}
+                            <DropdownMenu.TriggerIcon />
+                        </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content>
+                        <DropdownMenu.Item onClick={() => videoFetcher.selectVideo()}>Load new video&hellip;</DropdownMenu.Item>
+                        <DropdownMenu.Separator />
+                        <DropdownMenu.Item onClick={() => videoFetcher.selectVideo(fileName)}>Replace video&hellip;</DropdownMenu.Item>
+                        <DropdownMenu.Item onClick={uploadSubtitles}>Replace subtitles&hellip;</DropdownMenu.Item>
+                        <DropdownMenu.Item color="red" onClick={() => videoFetcher.deleteVideo(fileName)}>Delete video</DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                </DropdownMenu.Root>
+                : <Button onClick={() => videoFetcher.selectVideo()}><UploadIcon /> Load a video</Button>
+            }
+            <Tooltip content={copied ? "Copied!" : null} open={copied}>
+                <Button onClick={copyTranscript} disabled={!video}><ClipboardCopyIcon /> Copy transcript</Button>
+            </Tooltip>
+            <Button onClick={downloadSubtitles} disabled={!video}><DownloadIcon /> Download subtitles</Button>
+            <TranscribeButton subtitles={subtitles} video={video} />
+        </Flex>
+        <ColorSchemeToggle />
     </Flex>
 
     async function copyTranscript() {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { $path } from "safe-routes";
 import type { Route } from "./+types/index";
+import { ColorSchemeToggle } from "./ColorSchemeToggle";
 import { DropArea } from "./DropArea";
 import { fileNameWithoutExtension, index } from "./storage";
 import { emptyArray } from "./utils";
@@ -40,7 +41,7 @@ function IndexContent({ videos }: { videos: readonly IVideo[] }) {
 
     return <ScrollArea size="3">
         <DropArea>
-            <Box>
+            <Box position="relative">
                 <Container p="4">
                     <Flex direction="column" align="start" gap="8" pt="9">
                         <img src={title} />
@@ -83,6 +84,9 @@ function IndexContent({ videos }: { videos: readonly IVideo[] }) {
                         </Flex>}
                     </Flex>
                 </Container>
+                <Box position="absolute" top="var(--space-2)" right="var(--space-2)">
+                    <ColorSchemeToggle />
+                </Box>
             </Box>
         </DropArea>
     </ScrollArea>
