@@ -29,7 +29,18 @@ body {
     &:hover,
     &:focus {
         --card-background-color: var(--focus-4);
+
+        .videoCard-delete {
+            visibility: visible;
+        }
     }
+}
+
+.videoCard-delete {
+    visibility: hidden;
+    position: absolute;
+    right: var(--space-2);
+    bottom: var(--space-2);
 }
 
 video {
