@@ -1,4 +1,4 @@
-import { Theme } from "@radix-ui/themes"
+import { Container, Theme } from "@radix-ui/themes"
 import radixThemes from "@radix-ui/themes/styles.css?url"
 import { posthog } from "posthog-js"
 import { useEffect } from "react"
@@ -68,13 +68,15 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         stack = error.stack
     }
 
-    return <main className="pt-16 p-4 container mx-auto">
-        <h1>{message}</h1>
-        <p>{details}</p>
-        {stack && (
-            <pre className="w-full p-4 overflow-x-auto">
-                <code>{stack}</code>
-            </pre>
-        )}
-    </main>
+    return <Container p="4" asChild>
+        <main>
+            <h1>{message}</h1>
+            <p>{details}</p>
+            {stack && (
+                <pre className="w-full p-4 overflow-x-auto">
+                    <code>{stack}</code>
+                </pre>
+            )}
+        </main>
+    </Container>
 }
