@@ -3,6 +3,7 @@ import radixThemes from "@radix-ui/themes/styles.css?url"
 import { posthog } from "posthog-js"
 import { useEffect } from "react"
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, } from "react-router"
+import { registerSW } from "virtual:pwa-register"
 import type { Route } from "./+types/root"
 import stylesheet from "./app.css?url"
 import { MessageBoxProvider } from "./MessageBox"
@@ -43,6 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
     useEffect(() => {
+        registerSW()
         posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, { api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST })
     }, [])
 
