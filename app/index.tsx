@@ -41,7 +41,7 @@ function IndexContent({ videos }: { videos: readonly IVideo[] }) {
 
     return <ScrollArea size="3">
         <DropArea>
-            <Box position="relative">
+            <Box position="relative" height="100%">
                 <Container p="4">
                     <Flex direction="column" align="start" gap="8" pt="9">
                         <img src={title} />
