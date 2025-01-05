@@ -32,6 +32,7 @@
         "postcss": "^8.4.49",
         "typescript": "^5.7.2",
         "vite": "^6.0.7",
+        "vite-plugin-pwa": "^0.21.1",
         "vite-tsconfig-paths": "^5.1.4"
     }
 }

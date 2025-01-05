@@ -14,6 +14,7 @@ export const meta: Route.MetaFunction = () => [
 
 export const links: Route.LinksFunction = () => [
     { rel: 'icon', type: 'image/svg+xml', href: favicon },
+    { rel: 'apple-touch-icon', href: favicon, sizes: '180x180' },
     { rel: 'stylesheet', href: radixThemes },
     { rel: 'stylesheet', href: stylesheet },
 ]
@@ -23,6 +24,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <head>
             <meta charSet="utf-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <meta name="description" content="Free web-based subtitle editor" />
+            <meta name="theme-color" content="#3458d4" />
             <Meta />
             <Links />
         </head>
