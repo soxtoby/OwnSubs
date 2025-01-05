@@ -29,6 +29,18 @@ export default defineConfig({
                         src: 'pwa-192x192.png',
                         sizes: '192x192',
                         type: 'image/png',
+                        purpose: 'any'
+                    },
+                    {
+                        src: 'pwa-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'any'
+                    },
+                    {
+                        src: 'pwa-192x192.png',
+                        sizes: '192x192',
+                        type: 'image/png',
                         purpose: 'maskable'
                     },
                     {
@@ -38,6 +50,20 @@ export default defineConfig({
                         purpose: 'maskable'
                     }
                 ],
+                screenshots: [
+                    {
+                        src: 'pwa-screenshot-wide.avif',
+                        sizes: '2880x1620',
+                        type: 'image/avif',
+                        form_factor: 'wide'
+                    },
+                    {
+                        src: 'pwa-screenshot-narrow.avif',
+                        sizes: '1640x2360',
+                        type: 'image/avif',
+                        form_factor: 'narrow'
+                    }
+                ]
             },
         })
     ]

@@ -14,6 +14,7 @@ export const meta: Route.MetaFunction = () => [
 ]
 
 export const links: Route.LinksFunction = () => [
+    { rel: 'manifest', href: '/manifest.webmanifest' },
     { rel: 'icon', type: 'image/svg+xml', href: favicon },
     { rel: 'apple-touch-icon', href: favicon, sizes: '180x180' },
     { rel: 'stylesheet', href: radixThemes },
