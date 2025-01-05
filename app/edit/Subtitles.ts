@@ -185,7 +185,8 @@ export function readSubsFile(file: File): Promise<readonly ICue[]> {
         video.appendChild(track)
         track.src = URL.createObjectURL(file)
         track.onload = () => {
-            let cues = (Array.from(track.track.cues ?? emptyArray) as VTTCue[]).map(fromVTT)
+            let cues = (Array.from(track.track.cues ?? emptyArray) as VTTCue[])
+                .map((vttCue, i) => fromVTT(vttCue, `${i + 1}`))
             URL.revokeObjectURL(track.src)
             video.remove()
             resolve(cues)
@@ -194,9 +195,9 @@ export function readSubsFile(file: File): Promise<readonly ICue[]> {
     })
 }
 
-export function fromVTT(vttCue: VTTCue): ICue {
+export function fromVTT(vttCue: VTTCue, id?: string): ICue {
     return {
-        id: vttCue.id,
+        id: id ?? vttCue.id,
         start: vttCue.startTime,
         end: vttCue.endTime,
         text: vttCue.text
