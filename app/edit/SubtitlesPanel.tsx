@@ -127,7 +127,7 @@ const Cue = memo(function Cue({ cue, index, video, subtitles }: ICueProps) {
                 <Flex gap="2" className="cue-actions">
                     <Tooltip content="Remove">
                         <Skeleton loading={loading}>
-                            <IconButton size="1" color="gray" variant="soft" onClick={() => subtitles?.remove(cue.id)} >
+                            <IconButton aria-label="Delete cue" size="1" color="gray" variant="soft" onClick={() => subtitles?.remove(cue.id)} >
                                 <TrashIcon />
                             </IconButton>
                         </Skeleton>

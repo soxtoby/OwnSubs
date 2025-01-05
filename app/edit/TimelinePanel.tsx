@@ -60,7 +60,7 @@ export function TimelinePanel({ video, subtitles }: ITimelinePanelProps) {
                         {video &&
                             <div ref={playheadRef} className={'timeline-playhead' + (noCuesAtCurrentTime() ? ' is-timeline-freeSpace' : '')}>
                                 <Tooltip content="Add cue">
-                                    <IconButton radius="full" size="1" className="timeline-addButton" onClick={insertCue}><PlusIcon /></IconButton>
+                                    <IconButton aria-label="Add cue" radius="full" size="1" className="timeline-addButton" onClick={insertCue}><PlusIcon /></IconButton>
                                 </Tooltip>
                             </div>
                         }

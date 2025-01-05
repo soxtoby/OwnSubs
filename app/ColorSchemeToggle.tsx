@@ -12,7 +12,7 @@ export function ColorSchemeToggle() {
 
     return <Flex p="2">
         <Tooltip content="Toggle light/dark mode">
-            <IconButton size="3" variant="ghost" onClick={() => toggleColorScheme()}>
+            <IconButton aria-label="Toggle light/dark mode" size="3" variant="ghost" onClick={() => toggleColorScheme()}>
                 <SunIcon />
             </IconButton>
         </Tooltip>

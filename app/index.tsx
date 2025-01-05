@@ -64,6 +64,7 @@ function IndexContent({ videos }: { videos: readonly IVideo[] }) {
                                             </Flex>
                                             <Tooltip content="Delete video">
                                                 <IconButton
+                                                    aria-label="Delete video"
                                                     tabIndex={-1}
                                                     onClick={e => {
                                                         e.preventDefault()
