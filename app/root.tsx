@@ -1,7 +1,6 @@
 import { Theme } from "@radix-ui/themes"
 import radixThemes from "@radix-ui/themes/styles.css?url"
 import { posthog } from "posthog-js"
-import { PostHogProvider } from "posthog-js/react"
 import { useEffect } from "react"
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, } from "react-router"
 import type { Route } from "./+types/root"
@@ -44,9 +43,7 @@ export default function App() {
         posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, { api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST })
     }, [])
 
-    return <PostHogProvider client={posthog}>
-        <Outlet />
-    </PostHogProvider>
+    return <Outlet />
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
