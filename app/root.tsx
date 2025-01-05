@@ -45,7 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
     useEffect(() => {
-        registerSW()
+        registerSW({ onOfflineReady: () => alert('App is ready to work offline!') })
         posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, { api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST })
     }, [])
 

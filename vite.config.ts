@@ -17,7 +17,10 @@ export default defineConfig({
         tsconfigPaths(),
         VitePWA({
             registerType: 'autoUpdate',
-            workbox: { globPatterns: ['**/*.{js,css,html,png,jpg,svg,avif}'] },
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,png,jpg,svg,avif}'],
+                additionalManifestEntries: ['index.html']
+            },
             manifest: {
                 name: 'OwnSubs',
                 short_name: 'OwnSubs',
