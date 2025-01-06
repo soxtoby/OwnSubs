@@ -19,7 +19,7 @@ export default defineConfig({
             registerType: 'autoUpdate',
             workbox: {
                 globPatterns: ['**/*.{js,css,html,png,jpg,svg,avif}'],
-                additionalManifestEntries: ['/', 'index.html']
+                additionalManifestEntries: ['/', 'index.html', '__manifest'],
             },
             manifest: {
                 name: 'OwnSubs',
