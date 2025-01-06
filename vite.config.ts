@@ -19,7 +19,7 @@ export default defineConfig({
             registerType: 'autoUpdate',
             workbox: {
                 globPatterns: ['**/*.{js,css,html,png,jpg,svg,avif}'],
-                additionalManifestEntries: ['index.html']
+                additionalManifestEntries: ['/', 'index.html']
             },
             manifest: {
                 name: 'OwnSubs',
@@ -71,7 +71,7 @@ export default defineConfig({
         })
     ],
     define: {
-        'import.meta.env.VITE_PUBLIC_POSTHOG_KEY': JSON.stringify(process.env.VITE_PUBLIC_POSTHOG_KEY),
-        'import.meta.env.VITE_PUBLIC_POSTHOG_HOST': JSON.stringify(process.env.VITE_PUBLIC_POSTHOG_HOST),
+        '__PUBLIC_POSTHOG_KEY': JSON.stringify(process.env.VITE_PUBLIC_POSTHOG_KEY),
+        '__PUBLIC_POSTHOG_HOST': JSON.stringify(process.env.VITE_PUBLIC_POSTHOG_HOST),
     }
 })

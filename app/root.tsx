@@ -45,8 +45,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
     useEffect(() => {
-        registerSW({ onOfflineReady: () => alert('App is ready to work offline!') })
-        posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, { api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST })
+        registerSW({
+            immediate: true,
+            onRegisterError: (error) => console.error('Service worker registration failed:', error),
+            onRegisteredSW: () => console.log('Service worker has been registered!'),
+            onNeedRefresh: () => console.log('App needs to be refreshed!'),
+            onOfflineReady: () => alert('App is ready to work offline!')
+        })
+        posthog.init((globalThis as any).__PUBLIC_POSTHOG_KEY, { api_host: (globalThis as any).__PUBLIC_POSTHOG_HOST })
     }, [])
 
     return <Outlet />
