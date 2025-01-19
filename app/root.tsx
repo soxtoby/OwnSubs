@@ -24,7 +24,7 @@ export const links: Route.LinksFunction = () => [
 ]
 
 export function HydrateFallback(props: Route.HydrateFallbackProps) {
-    return <Layout><IndexContent videos={emptyArray} /></Layout>
+    return <IndexContent videos={emptyArray} />
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
