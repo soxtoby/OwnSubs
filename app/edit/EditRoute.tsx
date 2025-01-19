@@ -19,10 +19,6 @@ export async function clientLoader({ params: { fileName } }: Route.ClientLoaderA
     return { videoFile, subsFile, cues } as const
 }
 
-export function HydrateFallback({ params: { fileName } }: Route.HydrateFallbackProps) {
-    return <MainUI fileName={fileName} loading />
-}
-
 export function ErrorBoundary({ error, params: { fileName } }: Route.ErrorBoundaryProps) {
     if (isRouteErrorResponse(error) && error.status == 404)
         return <MainUI><MissingVideoMessage fileName={fileName} /></MainUI>

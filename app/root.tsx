@@ -6,7 +6,9 @@ import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, 
 import { registerSW } from "virtual:pwa-register"
 import type { Route } from "./+types/root"
 import stylesheet from "./app.css?url"
+import { IndexContent } from "./IndexContent"
 import { MessageBoxProvider } from "./MessageBox"
+import { emptyArray } from "./utils"
 import favicon from "/favicon.svg"
 
 export const meta: Route.MetaFunction = () => [
@@ -20,6 +22,10 @@ export const links: Route.LinksFunction = () => [
     { rel: 'stylesheet', href: radixThemes },
     { rel: 'stylesheet', href: stylesheet },
 ]
+
+export function HydrateFallback(props: Route.HydrateFallbackProps) {
+    return <Layout><IndexContent videos={emptyArray} /></Layout>
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
     return <html lang="en">
